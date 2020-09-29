@@ -1,6 +1,6 @@
 # NAME
 
-penmon.eto - Implementation of Penman-Monteith ETo Equation implementation in Python.
+penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
 
 # SYNOPSIS
 
