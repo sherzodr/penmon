@@ -11,7 +11,7 @@ setup(
     author_email="sherzodr@gmail.com",
     license="MIT",
     url="https://github.com/sherzodr/penmon",
-    download_url="https://github.com/sherzodr/penmon/archive/0.1.1.tar.gz",
+    download_url="https://github.com/sherzodr/penmon/archive/0.1.2.tar.gz",
     py_modules=["penmon.eto"],
     package_dir={'': 'src'},
     packages=["penmon"],
