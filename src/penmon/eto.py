@@ -438,6 +438,13 @@ class StationDay:
 
         if n and not is_number(n):
             raise TypeError("'n' must be a number")
+        
+        if n < 0:
+            raise Exception("Observed daylight hours cannot be less than 0")
+        
+        # n cannot be more than N, which is available daylight hours
+        if n > self.daylight_hours():
+            raise Exception("Observed daylight hours cannot be more than possible daylight hours for this date")
 
         a_s = 0.25
         b_s = 0.50
