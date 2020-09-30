@@ -55,6 +55,15 @@ AUTHOR
 """
 import math
 
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 class Station:
     """
     Class that implements a weather station at a known latitude and elevation. 
@@ -65,8 +74,8 @@ class Station:
         Two arguments are required: latitude in decimal format, and altitude in meters. Southern hemisphere must have negative latitude.
         
         Public attributes are:
-         * latitude - user provided
-         * altitude - user provided
+         * latitude - user provided (float)
+         * altitude - user provided (int)
          * latitude_rad - latitude in radian, alculated based on latitude
          * days - dictionary of days recorded (or calculated) by this station
          * anemometer_height - defaults to 2m
@@ -74,6 +83,19 @@ class Station:
          * ref_crop - instance of **Crop** class, which sets default chracteristics
                       of the reference crop according to the paper.
         """
+        
+        if not type(latitude) is float:
+            raise TypeError("latitude must be a float")
+            
+        if  latitude <-90.0 or latitude > 90.0:
+            raise Exception("latitude must be between -90.0 and 90.0")
+        
+        if not type(altitude) is int:
+            raise TypeError("altitude must be an integer")
+        
+        if altitude < 0:
+            raise Exception("'altitude' must be above 0")
+
         self.latitude = latitude
         self.altitude = altitude
         self.latitude_rad = round((math.pi / 180 * self.latitude), 3)
@@ -92,6 +114,13 @@ class Station:
         """
         Given a day number (from 1-366) returns a **StationDay*** instance for that day. Logs the day in *days* attribute of the **Station()** class.
         """
+        
+        if not type(day_number) is int:
+            raise TypeError("'day_number' must be an integer")
+        
+        if not ( day_number >= 1 and day_number <= 366 ):
+            raise Exception("'day_number' must be between in the range 1-366")
+
         day = StationDay(day_number, self)
         self.days[day_number] = day
         return day;
@@ -406,6 +435,9 @@ class StationDay:
 
             else:
                 n = self.daylight_hours()
+
+        if n and not is_number(n):
+            raise TypeError("'n' must be a number")
 
         a_s = 0.25
         b_s = 0.50

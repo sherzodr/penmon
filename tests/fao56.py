@@ -157,20 +157,20 @@ class Test(unittest.TestCase):
         self.assertEqual(declination, 0.120)
 
     def test_sunset_hour_angle(self):
-        station = Station(-20, 1200)
+        station = Station(-20.0, 1200)
         sunset_angle = station.day(246).sunset_hour_angle()
         self.assertEqual(sunset_angle, 1.527)
 
     def test_r_a(self):
-        r_a = Station(-20, 1200).day(246).R_a()
+        r_a = Station(-20.0, 1200).day(246).R_a()
         self.assertEqual(r_a, 32.2)
 
     def test_r_a_in_mm(self):
-        r_a = Station(-20, 1200).day(246).R_a_in_mm()
+        r_a = Station(-20.0, 1200).day(246).R_a_in_mm()
         self.assertEqual(r_a, 13.10)
 
     def test_daylight_hours(self):
-        hours = Station(-20, 1200).day(246).daylight_hours()
+        hours = Station(-20.0, 1200).day(246).daylight_hours()
         self.assertEqual(hours, 11.7)
 
     def test_solar_radiation(self):

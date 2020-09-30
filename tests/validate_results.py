@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
             233:[16.9, 33.6, 5.72],
             234:[16.0, 35.5, 6.27]
             }
-        
+
         for day_number, wdata in data.items():
             day = station.get_day(day_number)
             day.temp_min = wdata[0]
@@ -38,7 +38,5 @@ class Test(unittest.TestCase):
 
         self.assertEqual(day.eto(), 5.3)
 
-
 if __name__ == "__main__":
     unittest.main() 
-    

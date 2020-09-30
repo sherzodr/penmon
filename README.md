@@ -11,7 +11,7 @@ penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
     day.temp_min = 19.5
     day.temp_max = 25.6
     
-    print("ETo for this day is", day.eto)
+    print("ETo for this day is", day.eto() )
 
 # DESCRIPTION
 
