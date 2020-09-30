@@ -48,13 +48,24 @@ class Test(unittest.TestCase):
 
     def test_day_number_range(self):
         station = pm.Station(latitude=41.42, altitude=109)
-        
+
         try:
             day = station.get_day(367)
         except:
             self.assertTrue(True, "Exception was expected and raised")
         else:
             self.assertTrue(False, "Exception was expected but was NOT raised")
+
+
+    def test_immature_eto(self):
+        station = pm.Station(41.42, 109)
+        day = station.get_day(238)
+        
+        eto = day.eto()
+
+        self.assertEqual(eto, None)
+
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

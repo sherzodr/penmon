@@ -63,7 +63,6 @@ def is_number(s):
     except ValueError:
         return False
 
-
 class Station:
     """
     Class that implements a weather station at a known latitude and elevation. 
@@ -112,7 +111,8 @@ class Station:
     
     def get_day(self, day_number):
         """
-        Given a day number (from 1-366) returns a **StationDay*** instance for that day. Logs the day in *days* attribute of the **Station()** class.
+        Given a day number (from 1-366) returns a **StationDay*** instance for 
+        that day. Logs the day in *days* attribute of the **Station()** class.
         """
         
         if not type(day_number) is int:
@@ -135,20 +135,25 @@ class StationDay:
     """
     Represents a single day retrieved from the Station.
     
-    This class is usually not instantiated directly. It's instantniated by the **Station()**'s get_day() method, passing all reuqired state data.
+    This class is usually not instantiated directly. It's instantniated by the 
+    **Station()**'s get_day() method, passing all reuqired state data.
     
-    Since bulk of Penman-Moneith is concerned with a daily ETo **StationDay** is heart of the module. 
-    Penman-Monteith equatoin is implemented within the methods of **StationDay**. 
+    Since bulk of Penman-Moneith is concerned with a daily ETo **StationDay** is 
+    heart of the module. Penman-Monteith equatoin is implemented within the 
+    methods of **StationDay**. 
     
     All meteorological data are stored within this class instance.
     """
 
     def __init__(self, day_number, station):
         """
-        *day_number* and *station* are two required arguments passed to instantiate the class. Day number must be between 1-366. 
-        It represents a single day in a year, *1* meaning January 1st, and 365 (or 366) being Decement 31st. *station* must be 
-        instance of **Station** class. It reads such important information from the station as its location,
-        altitude, climate conditions. Without this information it's impossible to calculate solar radiation and humidity data.
+        *day_number* and *station* are two required arguments passed to
+        instantiate the class. Day number must be between 1-366. It represents a
+        single day in a year, *1* meaning January 1st, and 365 (or 366) being
+        Decement 31st. *station* must be instance of **Station** class. It reads
+        such important information from the station as its location, altitude,
+        climate conditions. Without this information it's impossible to
+        calculate solar radiation and humidity data.
         
         Following attributes of the class are available. They can be both set and read from.
         
@@ -193,10 +198,13 @@ class StationDay:
         """
         Returns wind speed at 2m height. 
         
-        If this information is already logged, returns as is. If anemometer of the Station is located higher and wind speed
-        information is available it converts this information to wind speed as 2ms based on  logarithimc conversion (Eq. 47)
+        If this information is already logged, returns as is. If anemometer of
+        the Station is located higher and wind speed information is available it
+        converts this information to wind speed as 2ms based on  logarithimc
+        conversion (Eq. 47)
         
-        If wind speed was not logged for this date, and if climate is known tries to rely on Climate data to estimate average wind speed
+        If wind speed was not logged for this date, and if climate is known
+        tries to rely on Climate data to estimate average wind speed
         """
         
         # if wind speed at 2m height is given, return it
@@ -205,11 +213,13 @@ class StationDay:
         
         # if wind speed at height different than 2m is given, calculate wind speed at 2m
         if self.wind_speed and self.station.anemometer_height != 2:
-            self.wind_speed = round(self.wind_speed * (4.87 / math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
+            self.wind_speed = round(self.wind_speed * 
+                                    (4.87 / math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
             return self.wind_speed
         
-        # if we reach this far no wind information is available to work with. 
-        # we consult if station has any climatic data, in which case we try to deduce information off of that:
+        # if we reach this far no wind information is available to work with. we
+        # consult if station has any climatic data, in which case we try to
+        # deduce information off of that:
         if self.station.climate:
             return self.station.climate.average_wind_speed
 
@@ -217,9 +227,9 @@ class StationDay:
 
     def dew_point(self):
         """
-        If *temp_dew* attribute is logged returns as is. If this data was not logged, but *temp_min* data 
-        is available tries to estimate *temp_dew* based on Station's Climate. If either is not possible 
-        returns *None*.
+        If *temp_dew* attribute is logged returns as is. If this data was not
+        logged, but *temp_min* data is available tries to estimate *temp_dew*
+        based on Station's Climate. If either is not possible returns *None*.
         """
         if self.temp_dew: 
             return self.temp_dew
@@ -248,14 +258,16 @@ class StationDay:
 
     def psychrometric_constant(self):
         """
-        Calculates psychrometric constant based on Station's altitude (and atmospheric pressure). (Eq. 8)
+        Calculates psychrometric constant based on Station's altitude (and
+        atmospheric pressure). (Eq. 8)
         """
         return round(0.665 * 10 ** (-3) * self.atmospheric_pressure(), 6)
     
     def Tmean(self):
         """
-        If *temp_mean* is logged returns is as is. If *temp_min* and *temp_max* are available computes *Tmean* based on these data.
-        If none are available returns *None*. (Eq. 9)
+        If *temp_mean* is logged returns is as is. If *temp_min* and *temp_max*
+        are available computes *Tmean* based on these data. If none are
+        available returns *None*. (Eq. 9)
         """
         if self.temp_mean:
             return self.temp_mean;
@@ -285,19 +297,24 @@ class StationDay:
 
     def slope_of_saturation_vapour_pressure(self, T):
         """
-        Calculates slope of the saturation vapour pressure curve for a given temperature. It's the required information to calculate ETo. (Eq. 13)
+        Calculates slope of the saturation vapour pressure curve for a given
+        temperature. It's the required information to calculate ETo. (Eq. 13)
         """
-        return round((4098 * (0.6108 * 2.7183 ** (17.27 * T / (T + 237.3)))) / ((T + 237.3) ** 2), 6)
+        return round((4098 * (0.6108 * 2.7183 ** (17.27 * T / (T + 237.3)))) 
+                     / ((T + 237.3) ** 2), 6)
     
     def actual_vapour_pressure(self):
         """
-        Attepmts to calculate vapour pressure based on several available weather data. 
+        Attepmts to calculate vapour pressure based on several available weather
+        data.
         
-        If *temp_dry* and *temp_wet* data are logged (psychrometric data) uses (Eq. 15) to calculate actual vapour pressure. 
-        If only *temp_dew* information is logged uses (Eq. 14) to calculate actual vapour pressure.
-        If *humidity_max* and *humidity_min* are logged uses (Eq. 17) to calculate vapour pressure.
-        If only *humidity_max* is known uses (Eq. 18) to estimate actual vapour pressure.
-        If only *humidity_mean* is known uses (Eq. 19) to estimate actual vapour pressure.
+        If *temp_dry* and *temp_wet* data are logged (psychrometric data) uses
+        (Eq. 15) to calculate actual vapour pressure. If only *temp_dew*
+        information is logged uses (Eq. 14) to calculate actual vapour pressure.
+        If *humidity_max* and *humidity_min* are logged uses (Eq. 17) to
+        calculate vapour pressure. If only *humidity_max* is known uses (Eq. 18)
+        to estimate actual vapour pressure. If only *humidity_mean* is known
+        uses (Eq. 19) to estimate actual vapour pressure.
         """
         if self.vapour_pressure:
             return self.vapour_pressure
@@ -305,12 +322,14 @@ class StationDay:
         if self.temp_dry and self.temp_wet:
             vp_wet = self.saturation_vapour_pressure(self.temp_wet)
             psychrometric_constant = self.psychrometric_constant()
-            return round(vp_wet - psychrometric_constant * (self.temp_dry - self.temp_wet), 3)
+            return round(vp_wet - psychrometric_constant * 
+                         (self.temp_dry - self.temp_wet), 3)
 
         if self.humidity_max and self.humidity_min and self.temp_max and self.temp_min:
             vp_min = self.saturation_vapour_pressure(self.temp_min)
             vp_max = self.saturation_vapour_pressure(self.temp_max)
-            return round((vp_min * (self.humidity_max / 100) + vp_max * (self.humidity_min / 100)) / 2, 3)
+            return round((vp_min * (self.humidity_max / 100) + 
+                          vp_max * (self.humidity_min / 100)) / 2, 3)
 
         if self.humidity_max and self.temp_min:
             vp_min = self.saturation_vapour_pressure(self.temp_min)
@@ -347,10 +366,9 @@ class StationDay:
         """
         Eq. 27
         """
-        x = 1 - math.tan(self.station.latitutde_radians) * math.tan(self.solar_declination())
-        if x <= 0:
-            x = 0.00001 
-
+        x = (1 - math.tan(self.station.latitutde_radians) * 
+             math.tan(self.solar_declination()))
+        if x <= 0: x = 0.00001 
         return x
     
     def sunset_hour_angle(self):
@@ -358,8 +376,11 @@ class StationDay:
         Eq. 25
         """
 
-        return round(math.acos(-1 * math.tan(self.station.latitude_rad) * math.tan(self.solar_declination())), 3)
-        # return math.pi / 2 - math.atan(-1 * math.tan(self.station.latitutde_radians) * math.tan(self.solar_declination()) / ( self.X() ** 0.5 ))
+        return round(math.acos(-1 * math.tan(self.station.latitude_rad) * 
+                               math.tan(self.solar_declination())), 3)
+        # return math.pi / 2 - math.atan(-1 *
+        # math.tan(self.station.latitutde_radians) *
+        # math.tan(self.solar_declination()) / ( self.X() ** 0.5 ))
     
     def R_a(self):
         """
@@ -388,27 +409,29 @@ class StationDay:
     # Rs
     def solar_radiation(self, n=None):
         """
-        If *radiation_s* is logged, returns the value as is. 
-        Given *n* - sun hours during the day returns solar radiation amount in mJ/m2/day.
-        To convert this number to W/m2 multiply multiply it by 11.57 or divide by 0.0864.
-        Uses Angstrom equation (Eq. 35).
+        If *radiation_s* is logged, returns the value as is. Given *n* - sun
+        hours during the day returns solar radiation amount in mJ/m2/day. To
+        convert this number to W/m2 multiply multiply it by 11.57 or divide by
+        0.0864. Uses Angstrom equation (Eq. 35).
+
+        In this case *n* is not needed. Ignored even if it's passed. If
+        *radiation_s* is not logged it calculates it based on Station location,
+        date of the year, and *n*.
         
-        In this case *n* is not needed. Ignored even if it's passed. If *radiation_s* 
-        is not logged it calculates it based on Station location, date of the year, and *n*.
+        If *n* is None (default value) it behaves differently depending on the
+        climate data availability:
         
-        If *n* is None (default value) it behaves differently depending on the climate data
-        availability:
+        If climate data is available, and climate is *island* location and
+        station elevation is between 0-100m it uses simplified (Eq. 51). This
+        equation does not use temperature data, but just solar radiation and a
+        coefficient.
         
-        If climate data is available, and climate is *island* location and station
-        elevation is between 0-100m it uses simplified (Eq. 51). This equation does not
-        use temperature data, but just solar radiation and a coefficient.
+        If station elevation is higher than 100m and/or location is not island
+        it uses (Eq. 50) that calculates solar radiation by using temperature
+        data along with a *krs* constant.
         
-        If station elevation is higher than 100m and/or location is not island it uses
-        (Eq. 50) that calculates solar radiation by using temperature data along with
-        a *krs* constant.
-        
-        If climate is not known it assumes **n=N**, meaning daily sunshine hours is the same as 
-        daylight hours for the given day and location. 
+        If climate is not known it assumes **n=N**, meaning daily sunshine hours
+        is the same as daylight hours for the given day and location.
         """
 
         if self.radiation_s:
@@ -416,13 +439,15 @@ class StationDay:
 
         if n == None:
             # if we are in island location we refer to equation 51 in UAN-FAO paper 56
-            if self.station.climate and self.station.climate.island_location and self.station.altitude < 100:
+            if ( self.station.climate and self.station.climate.island_location 
+                 and self.station.altitude < 100 ):
                 Ra = self.R_a()
                 return round((0.7 * Ra) - 4, 1)
 
             if self.station.climate and self.temp_min and self.temp_max:
-                # We assume caller has only temperature informaiton, and no information
-                # on overcast conditions. So we resort to Hargreaves and Samani's radiation formula:
+                # We assume caller has only temperature informaiton, and no
+                # information on overcast conditions. So we resort to Hargreaves
+                # and Samani's radiation formula:
                 climate = self.station.climate
                 Ra = self.R_a()
                 krs = 0.16
@@ -440,11 +465,13 @@ class StationDay:
             raise TypeError("'n' must be a number")
         
         if n < 0:
-            raise Exception("Observed daylight hours cannot be less than 0")
+            raise ValueError("Observed daylight hours cannot be less than 0")
         
         # n cannot be more than N, which is available daylight hours
         if n > self.daylight_hours():
-            raise Exception("Observed daylight hours cannot be more than possible daylight hours for this date")
+            raise ValueError(
+                "Observed daylight hours cannot be more than possible daylight hours for this date"
+                )
 
         a_s = 0.25
         b_s = 0.50
@@ -495,7 +522,8 @@ class StationDay:
         rso = self.R_so()
         
         sb_constant = self.stephan_boltzmann_constant
-        return round(sb_constant * ((TmaxK ** 4 + TminK ** 4) / 2) * (0.34 - 0.14 * math.sqrt(ea)) * (1.35 * (rs / rso) - 0.35), 1)
+        return round(sb_constant * ((TmaxK ** 4 + TminK ** 4) / 2) * 
+                     (0.34 - 0.14 * math.sqrt(ea)) * (1.35 * (rs / rso) - 0.35), 1)
     
     def net_radiation(self, n=None):
         """
@@ -516,8 +544,13 @@ class StationDay:
             return round(net_radition * 0.408, 1)
 
     def RH(self, T):
+        
+        if not is_number(T):
+            raise TypeError("Number is expected")
+        
         """Calculates relative humidity of the air for certain temperature using vapour pressure"""
-        return round(100 * (self.actual_vapour_pressure() / self.saturation_vapour_pressure(T)), 2)
+        return round(100 * (self.actual_vapour_pressure() /
+                             self.saturation_vapour_pressure(T)), 2)
     
     def soil_heat_flux(self):
         """
@@ -531,7 +564,8 @@ class StationDay:
         available, or can be estimated thsi equation is not recommended. ( Eq. 52 )
         """
         Tmean = (self.temp_max + self.temp_min) / 2
-        return round (0.0023 * (Tmean + 17.8) * (self.temp_max - self.temp_min) ** 0.5 * self.R_a(), 2)
+        return round (0.0023 * (Tmean + 17.8) * 
+                      (self.temp_max - self.temp_min) ** 0.5 * self.R_a(), 2)
     
     def eto(self):
         """
@@ -550,9 +584,14 @@ class StationDay:
 
             slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
             net_radiation = self.net_radiation()
+            G = self.soil_heat_flux()
+            u2m = self.wind_speed_2m()
 
-            eto_nominator = 0.408 * slope_of_vp * (net_radiation - self.soil_heat_flux()) + self.psychrometric_constant() * (900 / (Tmean + 273)) * self.wind_speed_2m() * self.vapour_pressure_deficit()
-            eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * self.wind_speed_2m())
+            eto_nominator = (0.408 * slope_of_vp * (net_radiation - G) +
+            self.psychrometric_constant() * (900 / (Tmean + 273)) * u2m *
+            self.vapour_pressure_deficit())
+
+            eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
 
             return round(eto_nominator / eto_denominator, 2)
 
@@ -699,8 +738,8 @@ class Climate:
         return f"""
 Climate can be described as located in {location} area, {humidity}. 
 Average wind speeds are estimated at {self.average_wind_speed}. 
-Dew point temperature is usually runs {self.dew_point_difference}C lower than day's minimal observed temperature"""
-
+Dew point temperature is usually runs {self.dew_point_difference}C lower than 
+day's minimal observed temperature"""
 
 class Crop:
     """ 
