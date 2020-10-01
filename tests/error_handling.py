@@ -66,7 +66,6 @@ class Test(unittest.TestCase):
         self.assertEqual(eto, None)
 
 
-
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

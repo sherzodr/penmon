@@ -54,6 +54,8 @@ AUTHOR
     Sherzod Ruzmetov <sherzodr@gmail.com>
 """
 import math
+import datetime as dt
+
 
 
 def is_number(s):
@@ -70,7 +72,8 @@ class Station:
 
     def __init__(self, latitude, altitude):
         """
-        Two arguments are required: latitude in decimal format, and altitude in meters. Southern hemisphere must have negative latitude.
+        Two arguments are required: latitude in decimal format, and 
+        altitude in meters. Southern hemisphere must have negative latitude.
         
         Public attributes are:
          * latitude - user provided (float)
@@ -111,10 +114,23 @@ class Station:
     
     def get_day(self, day_number):
         """
-        Given a day number (from 1-366) returns a **StationDay*** instance for 
+        Given a day number (integer type from 1-366) returns a **StationDay*** instance for 
         that day. Logs the day in *days* attribute of the **Station()** class.
+        
+        If it receives a string it expects it to be in "yyyy-mm-dd" format, in which case
+        it parses the string into **datetime** and calculates day number
         """
         
+        if type(day_number) is str:
+            try:
+                dt1 = dt.datetime.strptime(day_number, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Date must be in YYYY-MM-DD format (ex: 2020-09-28)")
+
+            dt0 = dt.datetime(dt1.year, 1, 1)
+            dates_delta = dt1 - dt0
+            day_number = dates_delta.days
+
         if not type(day_number) is int:
             raise TypeError("'day_number' must be an integer")
         
@@ -155,7 +171,8 @@ class StationDay:
         climate conditions. Without this information it's impossible to
         calculate solar radiation and humidity data.
         
-        Following attributes of the class are available. They can be both set and read from.
+        Following attributes of the class are available. They can be both set
+        and read from.
         
         - day_number
         - station   - references **Station** class.
@@ -213,8 +230,8 @@ class StationDay:
         
         # if wind speed at height different than 2m is given, calculate wind speed at 2m
         if self.wind_speed and self.station.anemometer_height != 2:
-            self.wind_speed = round(self.wind_speed * 
-                                    (4.87 / math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
+            self.wind_speed = round(self.wind_speed * (4.87 / 
+                             math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
             return self.wind_speed
         
         # if we reach this far no wind information is available to work with. we
@@ -532,7 +549,7 @@ class StationDay:
         ns = self.R_ns(n)
         nl = self.R_nl(n)
         
-        if ns and nl:
+        if ( not ns is None ) and (not nl is None):
             return round(ns - nl, 1)
         
     def net_radition_in_mm(self, n=None):
@@ -548,7 +565,10 @@ class StationDay:
         if not is_number(T):
             raise TypeError("Number is expected")
         
-        """Calculates relative humidity of the air for certain temperature using vapour pressure"""
+        """
+        Calculates relative humidity of the air for certain temperature using vapour pressure
+        """
+
         return round(100 * (self.actual_vapour_pressure() /
                              self.saturation_vapour_pressure(T)), 2)
     

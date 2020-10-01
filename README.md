@@ -2,6 +2,10 @@
 
 penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
 
+# INSTALL
+
+	$ pip install penmon
+
 # USAGE
 
     import penmon.eto as pm
@@ -117,8 +121,13 @@ need to get a single day, identified by a day number:
 	day = station.get_day(238)
 	
 *day* is an instance of **StationDay** class. *238* above represents
-August 16th - it is 238th day of the year. So day number can only be an integer
-in 1-366 range. Based on this day number alone library is able to calculate inverse
+August 26th - it is 238th day of the year. So day number can only be an integer
+in 1-366 range. It also supports a date string:
+
+	day = station.get_day("2020-08-26")
+	day.day_number # returns 238
+
+Based on this day number alone library is able to calculate inverse
 of the relative Sun-Earth distance (Eq. 23), solar declination (Eq. 24), 
 which is used to calculate possible daylight hours for that particular day for 
 that particular latitude. It's amazing how much information we can deduce based 
