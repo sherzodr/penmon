@@ -129,7 +129,7 @@ class Station:
 
             dt0 = dt.datetime(dt1.year, 1, 1)
             dates_delta = dt1 - dt0
-            day_number = dates_delta.days
+            day_number = dates_delta.days+1
 
         if not type(day_number) is int:
             raise TypeError("'day_number' must be an integer")
