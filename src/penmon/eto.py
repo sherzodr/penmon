@@ -112,18 +112,26 @@ class Station:
         """ See get_day()"""
         return self.get_day(day_number)
     
-    def get_day(self, day_number):
+    def get_day(self, day_number, strp_template="%Y-%m-%d"):
         """
         Given a day number (integer type from 1-366) returns a **StationDay*** instance for 
         that day. Logs the day in *days* attribute of the **Station()** class.
         
         If it receives a string it expects it to be in "yyyy-mm-dd" format, in which case
         it parses the string into **datetime** and calculates day number
-        """
         
+        
+        If your date format is different than assumed, you can adjust *strp_template* 
+        as the second parameter. For example, following all three lines are identical
+        
+            day = station.get_day(229)
+            day = station.get_day("2020-08-16")
+            day = station.get_day('08/16/2020', '%m/%d/%Y')
+        """
+
         if type(day_number) is str:
             try:
-                dt1 = dt.datetime.strptime(day_number, "%Y-%m-%d")
+                dt1 = dt.datetime.strptime(day_number, strp_template)
             except ValueError:
                 raise ValueError("Date must be in YYYY-MM-DD format (ex: 2020-09-28)")
 
