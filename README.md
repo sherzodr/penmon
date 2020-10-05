@@ -15,15 +15,13 @@ penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
     station.anemometer_height = 10
 
 	# getting a day instance for August 16th
-    day = station.get_day(238)
-
-    day.temp_min = 19.5
-    day.temp_max = 25.6
-    day.wind_speed = 2.5
-    day.RH_mean = 65
-    day.radiation_s = 32.3
-    # ...
-    
+    day = station.get_day(238, 
+    		temp_min=19.5, 
+    		temp_max=25.6, 
+    		wind_speed=2.5,
+    		humidity_mean=65,
+    		radiation_s=25.6
+    		)
     print("ETo for this day is", day.eto() )
 
 # DESCRIPTION

@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
 
     def test_parse_us_date(self):
 
-        day=self.station.get_day("08/16/2020", "%m/%d/%Y")
+        day=self.station.get_day("08/16/2020", date_template="%m/%d/%Y")
         self.assertEqual(day.day_number, 229)
 
 if __name__ == "__main__":
