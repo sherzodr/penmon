@@ -212,12 +212,12 @@ The same as above but in mm. 16.4 for this example.
 
 Possible daylight hours for this day. 
 
-### day.solar_radiation(n)
+### day.solar_radiation()
 
-Given number of hours of direct sunlight calculates solar radiation on the 
-horizontal surface. In MJ/m2/day
+Depends on the value of *day.sunshine_hours* attribute. Returns solar radiation
+in MJ/m2/day
 
-### day.solar_radiation_in_mm(n)
+### day.solar_radiation_in_mm()
 
 Same as above, but returns in mm.
 
@@ -225,10 +225,10 @@ Same as above, but returns in mm.
 
 Calculates Clear-Sky solar radiation.
 
-### day.R_ns(n)
+### day.R_ns()
 
-Given hours of direct sunlight calculates net solar radiation (or shortwave radiation)
-Takes into account albedo of the crop. 
+Given hours of direct sunlight (in *day.sunshine_hours* attribute) calculates 
+net solar radiation (or shortwave radiation) Takes into account albedo of the crop. 
 
 ### day.soil_heat_flux()
 

@@ -174,12 +174,15 @@ class Test(unittest.TestCase):
         self.assertEqual(hours, 11.7)
 
     def test_solar_radiation(self):
-        radiation = Station(-22.90, 1200).day(135).solar_radiation(7.10)
+        day=Station(-22.90,1200).day(135)
+        day.sunshine_hours = 7.10
+        radiation = day.solar_radiation()
         self.assertEqual(radiation, 14.4)
         
     def test_clear_sky_solar_radiation(self):
         day = Station(-22.90, 0).day(135)
-        solar_radiation = day.solar_radiation(7.1)
+        day.sunshine_hours=7.1
+        solar_radiation = day.solar_radiation()
         self.assertEqual(solar_radiation, 14.4)
         
         clear_sky_radiation = day.R_so()
@@ -187,7 +190,8 @@ class Test(unittest.TestCase):
         
     def test_net_shortwave_radiation(self):
         day = Station(-22.90, 1200).day(135)
-        r_ns = day.R_ns(7.1)
+        day.sunshine_hours=7.1
+        r_ns = day.R_ns()
         self.assertEqual(r_ns, 11.1)
 
     def test_net_longwave_radiation(self):
@@ -199,8 +203,10 @@ class Test(unittest.TestCase):
 
         vp = day.actual_vapour_pressure()
         self.assertEqual(vp, 2.1)
+        
+        day.sunshine_hours = 7.1;
 
-        r_nl = day.R_nl(7.1)
+        r_nl = day.R_nl()
         self.assertEqual(r_nl, 3.5)
 
     def test_net_radiation(self):
@@ -208,8 +214,9 @@ class Test(unittest.TestCase):
         day.temp_max = 25.1
         day.temp_min = 19.1
         day.vapour_pressure = 2.1
+        day.sunshine_hours=7.1
 
-        net_radiation = day.net_radiation(7.1)
+        net_radiation = day.net_radiation()
         self.assertEqual(net_radiation, 7.6)
         
     def test_wind_speed2m(self):
