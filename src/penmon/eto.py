@@ -1,16 +1,14 @@
 """
-Penman-Monteith Equation implementation.
+Penman-Monteith Equation implementation in Python.
 
 Full implementation of Penman-Monteith ETo equation based on UAN-FAO 
-Irrigation and Drainage Paper 56. Document is available at http://www.fao.org/3/X0490E/x0490e00.htm
+[Irrigation and Drainage Paper 56](http://www.fao.org/3/X0490E/x0490e00.htm)
 
 Penman-Monteith equation is used to calculate reference crop evapotranspiration (ETo) 
 for a given location using available climate data. This method provides many ways of estimating
 missing climate data using minimal data.
-
-@author: sherzodr@gmail.com
-
 """
+
 import math
 import datetime as dt
 
@@ -24,22 +22,29 @@ def is_number(s):
 
 
 class Station:
-    """
-    Class that implements a weather station at a known latitude and elevation. 
-    """
+    """ Class that implements a weather station at a known latitude and elevation."""
 
     def __init__(self, latitude, altitude, anemometer_height=2):
         """
-        Two arguments are required: latitude in decimal format, and 
-        altitude in meters. Southern hemisphere must have negative latitude.
-
-        Public attributes are:
-         * latitude - user provided (float)
-         * altitude - user provided (int)
+        Required parameters:
+        
+        :param latitude: latitude of the location in decimal format. For southern
+            hemisphere negative number must be used
+        :type latitude: float
+        
+        :param altitude: altitude (elevation) of the location in meters
+        :type altitude: int
+        
+        :param anemometer_height=2: height of the anemometer (wind-speed)
+            measuring device
+        :type anemometer_height: int
+        
+        Following are additional attributes that you can get/set on this station
+        after instantiation:
+        
          * latitude_rad - latitude in radian, alculated based on latitude
          * days - dictionary of days recorded (or calculated) by this station
-         * anemometer_height - defaults to 2m
-         * climate - set to default **Climate()**
+         * climate - set to default **Climate()** instance
          * ref_crop - instance of **Crop** class, which sets default chracteristics
                       of the reference crop according to the paper.
         """
@@ -70,7 +75,14 @@ class Station:
         """ See get_day()"""
         return self.get_day(day_number)
 
-    def get_day(self, day_number, date_template="%Y-%m-%d", temp_min=None, temp_max=None, wind_speed=None, humidity_mean=None, radiation_s=None, sunshine_hours=None):
+    def get_day(self, day_number, date_template="%Y-%m-%d", 
+                temp_min=None, 
+                temp_max=None, 
+                wind_speed=None, 
+                humidity_mean=None, 
+                radiation_s=None, 
+                sunshine_hours=None
+                ):
         """
         Given a day number (integer type from 1-366) returns a **StationDay*** instance for 
         that day. Logs the day in *days* attribute of the **Station()** class.
@@ -78,13 +90,24 @@ class Station:
         If it receives a string it expects it to be in "yyyy-mm-dd" format, in which case
         it parses the string into **datetime** and calculates day number
 
-
         If your date format is different than assumed, you can adjust *date_template* 
         as the second parameter. For example, following all three lines are identical
 
             day = station.get_day(229)
             day = station.get_day("2020-08-16")
             day = station.get_day('08/16/2020', '%m/%d/%Y')
+            
+        You can pass the following named-parameters to the method:
+        
+         - temp_min
+         - temp_max
+         - wind_speed
+         - radiation_s
+         - sunshine_hours
+         
+         If *radiation_s* and *sunshine_hours* is out of range for this location
+         for this date (based on solar declination, sun-distance and daylight hours)
+         raises ValueError exception.
         """
 
         if type(day_number) is str:
@@ -111,8 +134,18 @@ class Station:
         day.temp_max = temp_max
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
-        day.radiation_s = radiation_s
-        day.sunshine_hours = sunshine_hours
+        
+        if radiation_s:
+            if radiation_s <= day.R_so():
+                day.radiation_s = radiation_s
+            else:
+                raise ValueError("Raditaion out of range")
+
+        if sunshine_hours:
+            if  sunshine_hours <= day.daylight_hours() :
+                day.sunshine_hours = sunshine_hours
+            else:
+                raise ValueError("Sunshine hours out of range")
 
         return day
 
@@ -148,7 +181,7 @@ class StationDay:
         calculate solar radiation and humidity data.
 
         Following attributes of the class are available. They can be both set
-        and read from.
+        and get.
 
         - day_number
         - station   - references **Station** class.
@@ -170,6 +203,7 @@ class StationDay:
         - sunshine_hours
         -
         """
+
         self.day_number = day_number
         self.station = station
 
@@ -232,8 +266,7 @@ class StationDay:
             return self.temp_dew
 
         if self.temp_min and self.climate:
-            self.temp_dew = (self.temp_min - self.climate.dew_point_difference)
-            return self.temp_dew
+            return self.temp_min - self.climate.dew_point_difference
 
     def atmospheric_pressure(self):
         """
@@ -338,7 +371,7 @@ class StationDay:
             return round((self.humidity_mean / 100) * ((vp_max + vp_min) / 2), 3)
 
         if self.dew_point():
-            return round(self.saturation_vapour_pressure(self.temp_dew), 3)
+            return round(self.saturation_vapour_pressure(self.dew_point()), 3)
 
     def vapour_pressure_deficit(self):
         if self.temp_min and self.temp_max:
@@ -426,6 +459,10 @@ class StationDay:
         """
 
         if self.radiation_s:
+            # We need to make sure that solar radiation if set, is not
+            # larger than clear-sky solar radiation
+            if self.radiation_s > self.R_so():
+                raise ValueError("Solar radiation out ot range. Rso="+str(self.R_so()))
             return self.radiation_s
         
         n = self.sunshine_hours
@@ -462,9 +499,7 @@ class StationDay:
 
         # n cannot be more than N, which is available daylight hours
         if n > self.daylight_hours():
-            raise ValueError(
-                "Observed daylight hours cannot be more than possible daylight hours for this date"
-            )
+            raise ValueError( "Daylight hours out of range" )
 
         a_s = 0.25
         b_s = 0.50
@@ -700,9 +735,7 @@ class Climate:
         return self
 
     def island(self):
-        """
-        Sets *island_location*. Sets *k_rs* to 0.19
-        """
+        """ Sets *island_location*. Sets *k_rs* to 0.19 """
         self.interior_location = False
         self.coastal_location = False
         self.island_location = True
@@ -742,8 +775,7 @@ day's minimal observed temperature"""
 
 
 class Crop:
-    """ 
-    Represents reference crop as assumed by Penman-Monteith equation."""
+    """ Represents reference crop as assumed by Penman-Monteith equation.""" 
 
     def __init__(self, resistance_a=208, albedo=0.23, height=0.12):
         """
