@@ -12,6 +12,8 @@ missing climate data using minimal data.
 import math
 import datetime as dt
 
+CHECK_RADIATION_RANGE=True
+CHECK_SUNSHINE_HOURS_RANGE=True
 
 def is_number(s):
     try:
@@ -136,16 +138,22 @@ class Station:
         day.wind_speed = wind_speed
         
         if radiation_s:
-            if radiation_s <= day.R_so():
-                day.radiation_s = radiation_s
+            if CHECK_RADIATION_RANGE:
+                if radiation_s <= day.R_so():
+                    day.radiation_s = radiation_s
+                else:
+                    raise ValueError("Raditaion out of range")
             else:
-                raise ValueError("Raditaion out of range")
+                day.radiation_s = radiation_s
 
         if sunshine_hours:
-            if  sunshine_hours <= day.daylight_hours() :
-                day.sunshine_hours = sunshine_hours
+            if CHECK_SUNSHINE_HOURS_RANGE:
+                if  sunshine_hours <= day.daylight_hours() :
+                    day.sunshine_hours = sunshine_hours
+                else:
+                    raise ValueError("Sunshine hours out of range")
             else:
-                raise ValueError("Sunshine hours out of range")
+                day.sunshine_hours=sunshine_hours
 
         return day
 
@@ -461,7 +469,7 @@ class StationDay:
         if self.radiation_s:
             # We need to make sure that solar radiation if set, is not
             # larger than clear-sky solar radiation
-            if self.radiation_s > self.R_so():
+            if CHECK_RADIATION_RANGE and ( self.radiation_s > self.R_so() ):
                 raise ValueError("Solar radiation out ot range. Rso="+str(self.R_so()))
             return self.radiation_s
         
@@ -498,7 +506,7 @@ class StationDay:
             raise ValueError("Observed daylight hours cannot be less than 0")
 
         # n cannot be more than N, which is available daylight hours
-        if n > self.daylight_hours():
+        if ( n > self.daylight_hours() ) and CHECK_SUNSHINE_HOURS_RANGE:
             raise ValueError( "Daylight hours out of range" )
 
         a_s = 0.25
