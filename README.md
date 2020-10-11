@@ -87,15 +87,42 @@ If it's not, you can set the height as:
 Now all the wind_speed information is assumed to be wind speed at 10m
 height. This is important information, since ETo is calculated with speed
 close the crop surface, which is 2m. Library uses logarithmic algorithm
-to convert the data accordingly. Again, important setting!
+to convert the data accordingly. Again, important setting! Shoud you wish to 
+access calculated wind speed at 2m use *wind_speed_2m()* method:
+
+    day.wind_speed=2.0;
+    u2m = day.wind_speed_2m();
+    
+In the above example *u2m* returns *2.0* if the anemometer was set to 2 meters.
+If it was set to 10m, it returns 1.5. If it was set to 50 meters, it reads 1.2 m/s.
 	
 Station also makes certain assumptions about its climate. You can set this
 by creating a new climate instance (see **Climate** class) and set is as:
 
     humid_climate = pm.Climate().humid().coastal().strong_winds()
+    
+    arid_climate = pm.Climate().arid().interior().moderare_winds()
+    
     station.climate = humid_climate
 
-By default it assumes we are in *arid, interior location, with moderate winds*. 
+By default it assumes we are in *arid, interior location, with moderate winds*.
+If it's in arid climate, it makes certain assumption about the dew point temperature. 
+This temperature will be used to calculate relative humidity if humidity data
+is missing. It deduces dew_point temperature by looking at the temp_min of the record. 
+In particulare, for arid location it substracts 2.0 degrees from temp_min. In
+humid location it treats temp_min as temp_dew. In the following example
+we set dew_point temperature 4.0 below temp_min
+
+    climate=pm.Climate() 
+    # above is the same as saying:
+    # climate=pm.Climate().arid().interior().moderate_winds()
+    
+    climate.dew_point_difference=4.0
+    
+    station.climate=climate;
+    
+    # from now on if humidity data is missing it substtracts 4.0 degrees
+    from temp_min to take a guess at temp_dew
 
 It also assumes it will be calculating ETO for a refernce crop. According
 to the original paper is assumed to be grass of 0.12m height, aerodynamic 

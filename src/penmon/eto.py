@@ -12,8 +12,9 @@ missing climate data using minimal data.
 import math
 import datetime as dt
 
-CHECK_RADIATION_RANGE=True
-CHECK_SUNSHINE_HOURS_RANGE=True
+CHECK_RADIATION_RANGE = True
+CHECK_SUNSHINE_HOURS_RANGE = True
+
 
 def is_number(s):
     try:
@@ -29,21 +30,21 @@ class Station:
     def __init__(self, latitude, altitude, anemometer_height=2):
         """
         Required parameters:
-        
+
         :param latitude: latitude of the location in decimal format. For southern
             hemisphere negative number must be used
         :type latitude: float
-        
+
         :param altitude: altitude (elevation) of the location in meters
         :type altitude: int
-        
+
         :param anemometer_height=2: height of the anemometer (wind-speed)
             measuring device
         :type anemometer_height: int
-        
+
         Following are additional attributes that you can get/set on this station
         after instantiation:
-        
+
          * latitude_rad - latitude in radian, alculated based on latitude
          * days - dictionary of days recorded (or calculated) by this station
          * climate - set to default **Climate()** instance
@@ -77,12 +78,12 @@ class Station:
         """ See get_day()"""
         return self.get_day(day_number)
 
-    def get_day(self, day_number, date_template="%Y-%m-%d", 
-                temp_min=None, 
-                temp_max=None, 
-                wind_speed=None, 
-                humidity_mean=None, 
-                radiation_s=None, 
+    def get_day(self, day_number, date_template="%Y-%m-%d",
+                temp_min=None,
+                temp_max=None,
+                wind_speed=None,
+                humidity_mean=None,
+                radiation_s=None,
                 sunshine_hours=None
                 ):
         """
@@ -98,15 +99,15 @@ class Station:
             day = station.get_day(229)
             day = station.get_day("2020-08-16")
             day = station.get_day('08/16/2020', '%m/%d/%Y')
-            
+
         You can pass the following named-parameters to the method:
-        
+
          - temp_min
          - temp_max
          - wind_speed
          - radiation_s
          - sunshine_hours
-         
+
          If *radiation_s* and *sunshine_hours* is out of range for this location
          for this date (based on solar declination, sun-distance and daylight hours)
          raises ValueError exception.
@@ -136,7 +137,7 @@ class Station:
         day.temp_max = temp_max
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
-        
+
         if radiation_s:
             if CHECK_RADIATION_RANGE:
                 if radiation_s <= day.R_so():
@@ -148,12 +149,12 @@ class Station:
 
         if sunshine_hours:
             if CHECK_SUNSHINE_HOURS_RANGE:
-                if  sunshine_hours <= day.daylight_hours() :
+                if sunshine_hours <= day.daylight_hours():
                     day.sunshine_hours = sunshine_hours
                 else:
                     raise ValueError("Sunshine hours out of range")
             else:
-                day.sunshine_hours=sunshine_hours
+                day.sunshine_hours = sunshine_hours
 
         return day
 
@@ -252,9 +253,8 @@ class StationDay:
         # if wind speed at height different than 2m is given, calculate wind
         # speed at 2m
         if self.wind_speed and self.station.anemometer_height != 2:
-            self.wind_speed = round(self.wind_speed * (4.87 /
+            return round(self.wind_speed * (4.87 /
                                                        math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
-            return self.wind_speed
 
         # if we reach this far no wind information is available to work with. we
         # consult if station has any climatic data, in which case we try to
@@ -469,10 +469,11 @@ class StationDay:
         if self.radiation_s:
             # We need to make sure that solar radiation if set, is not
             # larger than clear-sky solar radiation
-            if CHECK_RADIATION_RANGE and ( self.radiation_s > self.R_so() ):
-                raise ValueError("Solar radiation out ot range. Rso="+str(self.R_so()))
+            if CHECK_RADIATION_RANGE and (self.radiation_s > self.R_so()):
+                raise ValueError(
+                    "Solar radiation out ot range. Rso=" + str(self.R_so()))
             return self.radiation_s
-        
+
         n = self.sunshine_hours
         if n == None:
             # if we are in island location we refer to equation 51 in UAN-FAO
@@ -506,8 +507,8 @@ class StationDay:
             raise ValueError("Observed daylight hours cannot be less than 0")
 
         # n cannot be more than N, which is available daylight hours
-        if ( n > self.daylight_hours() ) and CHECK_SUNSHINE_HOURS_RANGE:
-            raise ValueError( "Daylight hours out of range" )
+        if (n > self.daylight_hours()) and CHECK_SUNSHINE_HOURS_RANGE:
+            raise ValueError("Daylight hours out of range")
 
         a_s = 0.25
         b_s = 0.50
@@ -538,7 +539,7 @@ class StationDay:
 
     def R_ns(self):
         """
-        Net solar or net shortwave radiation. Uses Cro's albedo in calculations. (Eq. 38). 
+        Net solar or net shortwave radiation. Uses Crop's albedo in calculations. (Eq. 38). 
         Return radiation in MJ/m2/day
 
         """
@@ -559,7 +560,8 @@ class StationDay:
 
         sb_constant = self.stephan_boltzmann_constant
         return round(sb_constant * ((TmaxK ** 4 + TminK ** 4) / 2) *
-                     (0.34 - 0.14 * math.sqrt(ea)) * (1.35 * (rs / rso) - 0.35), 1)
+                     (0.34 - 0.14 * math.sqrt(ea)) * 
+                     (1.35 * (rs / rso) - 0.35), 1)
 
     def net_radiation(self):
         """
@@ -750,6 +752,7 @@ class Climate:
         self.k_rs = 0.19
         return self
 
+    """
     def set_location(self, location):
         if location == "coastal":
             return self.coastal()
@@ -761,6 +764,7 @@ class Climate:
             return self.island()
 
         return self
+    """
 
     def describe(self):
         location = ""
@@ -783,7 +787,7 @@ day's minimal observed temperature"""
 
 
 class Crop:
-    """ Represents reference crop as assumed by Penman-Monteith equation.""" 
+    """ Represents reference crop as assumed by Penman-Monteith equation."""
 
     def __init__(self, resistance_a=208, albedo=0.23, height=0.12):
         """
