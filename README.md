@@ -290,6 +290,11 @@ Recording solar radiation gets us the most accurate ETo:
 	
 # TODO
 
+ * rounding consistency. Currently rounding of decimal points for floating point numbers
+   follow the [original paper][1]'s usage examples. I did so in order to be able
+   to test examples used in the paper. However this is far from ideal. This
+   issue of significant digits must be revisited in future revisions!
+
  * *import_data()* must be supported by *penmon.eto.Station* class to import
    bulk data into the station.
  

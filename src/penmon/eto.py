@@ -15,14 +15,12 @@ import datetime as dt
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
 
-
 def is_number(s):
     try:
         float(s)
         return True
     except ValueError:
         return False
-
 
 class Station:
     """ Class that implements a weather station at a known latitude and elevation."""
@@ -50,6 +48,12 @@ class Station:
          * climate - set to default **Climate()** instance
          * ref_crop - instance of **Crop** class, which sets default chracteristics
                       of the reference crop according to the paper.
+                      
+        Should you wish to change assumes Climate and Crop characteristics
+        you can do so after the object is innitialized, like so:
+        
+            station=Station(41.42, 109)
+            station.ref_crop = Crop(albedo=0.25, height=0.35)
         """
 
         if not type(latitude) is float:
@@ -81,6 +85,7 @@ class Station:
     def get_day(self, day_number, date_template="%Y-%m-%d",
                 temp_min=None,
                 temp_max=None,
+                temp_mean=None,
                 wind_speed=None,
                 humidity_mean=None,
                 radiation_s=None,
@@ -135,6 +140,7 @@ class Station:
         self.days[day_number] = day
         day.temp_min = temp_min
         day.temp_max = temp_max
+        day.temp_mean=temp_mean
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
 
@@ -206,7 +212,6 @@ class StationDay:
         - vapour_pressure
         - wind_speed
         - radiation_s
-        - radiation_a
         - stephan_boltzman_constant
         - climate  - convenient reference to station.climate
         - sunshine_hours
@@ -224,7 +229,6 @@ class StationDay:
         self.humidity_max = None
         self.wind_speed = None
         self.radiation_s = None
-        self.radiation_a = None
         self.temp_dew = None
         self.temp_dry = None
         self.temp_wet = None
@@ -254,7 +258,7 @@ class StationDay:
         # speed at 2m
         if self.wind_speed and self.station.anemometer_height != 2:
             return round(self.wind_speed * (4.87 /
-                                                       math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
+                                            math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
 
         # if we reach this far no wind information is available to work with. we
         # consult if station has any climatic data, in which case we try to
@@ -551,6 +555,9 @@ class StationDay:
         """
         Net longwave radiation. (Eq. 39)
         """
+        
+        if not ( self.temp_max and self.temp_min ):
+            raise Exception("Net longwave radiation cannot be calculated without min/max temperature")
 
         TmaxK = self.temp_max + 273.16
         TminK = self.temp_min + 273.16
@@ -560,7 +567,7 @@ class StationDay:
 
         sb_constant = self.stephan_boltzmann_constant
         return round(sb_constant * ((TmaxK ** 4 + TminK ** 4) / 2) *
-                     (0.34 - 0.14 * math.sqrt(ea)) * 
+                     (0.34 - 0.14 * math.sqrt(ea)) *
                      (1.35 * (rs / rso) - 0.35), 1)
 
     def net_radiation(self):
@@ -568,7 +575,11 @@ class StationDay:
         Net Radiation. (Eq. 40)
         """
         ns = self.R_ns()
-        nl = self.R_nl()
+        
+        try: 
+            nl = self.R_nl()
+        except Exception as e: 
+            raise(str(e))
 
         if (not ns is None) and (not nl is None):
             return round(ns - nl, 1)
@@ -613,31 +624,32 @@ class StationDay:
         Eq. 6
         """
 
-        Tmax = self.temp_max
-        Tmin = self.temp_min
-
         # if we cannot get wind speed data we revert to Hargreaves formula.
-        # Which is not ideal!
+        # Which is not ideal! This can happen only if user removed default 'climate'
+        # reference
         if not self.wind_speed_2m():
             return self.eto_hargreaves()
 
-        if Tmax and Tmin:
-            Tmean = (Tmax + Tmin) / 2
 
-            slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
+        if self.Tmean() == None:
+            raise Exception(
+                "Cannot calculate eto(): temp_mean (mean temperature) is missing")
+
+        try:
             net_radiation = self.net_radiation()
-            G = self.soil_heat_flux()
-            u2m = self.wind_speed_2m()
+        except Exception as e:
+            raise(str(e))
 
-            eto_nominator = (0.408 * slope_of_vp * (net_radiation - G) +
-                             self.psychrometric_constant() * (900 / (Tmean + 273)) * u2m *
-                             self.vapour_pressure_deficit())
+        Tmean=self.Tmean()
+        slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
+        G = self.soil_heat_flux()
+        u2m = self.wind_speed_2m()
+        eto_nominator = (0.408 * slope_of_vp * (net_radiation - G) +
+                         self.psychrometric_constant() * (900 / (Tmean + 273)) * u2m *
+                         self.vapour_pressure_deficit())
 
-            eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
-
-            return round(eto_nominator / eto_denominator, 2)
-
-        return None
+        eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
+        return round(eto_nominator / eto_denominator, 2)
 
 
 class Climate:
