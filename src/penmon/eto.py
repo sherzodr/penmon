@@ -7,6 +7,9 @@ Full implementation of Penman-Monteith ETo equation based on UAN-FAO
 Penman-Monteith equation is used to calculate reference crop evapotranspiration (ETo) 
 for a given location using available climate data. This method provides many ways of estimating
 missing climate data using minimal data.
+
+Homepage of the project: https://github.com/sherzodr/penmon
+
 """
 
 import math

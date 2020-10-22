@@ -2,6 +2,13 @@
 Created on Sep 29, 2020
 
 @author: sherzodr
+
+This test case uses examples in the UN-FAO's "Irrigation and Drainage paper 56"
+as test cases, to verify we are in sync with oroginal paper's methodology.
+
+Examples in the original paper does not use floating points as consistently.
+I had to standardadize floating point arithmetic for the purposes of consistency.
+
 '''
 import unittest
 from penmon.eto import Station, Climate, StationDay
