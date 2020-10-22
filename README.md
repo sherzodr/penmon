@@ -1,6 +1,7 @@
 # NAME
 
-penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
+penmon - Implementation of weather station class in Python that supports 
+Penman-Monteith ETo Equation.
 
 # INSTALL
 
@@ -8,7 +9,7 @@ penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
 
 # USAGE
 
-    import penmon.eto as pm
+    import penmon as pm
     
     ### create a station class with known location and elevation
     station = pm.Station(latitude=41.42, altitude=109)
@@ -50,7 +51,7 @@ We'll talk more about it later (see Climate class below)
 
 To calculate *ETo*, including intermediate atmospheric data you first need to 
 define an instance of a **Station** with a known *latitude* and *altitude*. Then
-you request the station to create an instance of a **StationDay**, which represents
+you request the station to create an instance of a **DayEntry**, which represents
 a single day with a known date. We then set whatever data we know about that particular 
 day, and ask the **day** to calculate information that we do not know, including *ETo*.
 
@@ -64,7 +65,7 @@ in future releases. Consults **CHANGES** file before upgrading!
 
 ## CREATE A STATION instance
 
-	import penmon.eto as pm
+	import penmon as pm
 
 	station = pm.Station(latitude=41.42, altitude=109)
 
@@ -146,14 +147,14 @@ like following:
 	for a_day in station.days:
 		# do stuff with a_day
 
-# StationDay class
+# DayEntry class
 
 Once we have station data available we work with a day at a time. We first
 need to get a single day, identified by a day number:
 
 	day = station.get_day(238)
 	
-*day* is an instance of **StationDay** class. *238* above represents
+*day* is an instance of **DayEntry** class. *238* above represents
 *August 26th* - it is 238th day of the year. Day number can only be an integer
 in 1-366 range. It also supports a date string:
 
@@ -210,7 +211,7 @@ mostly astronomical calculations.
 
 Returns atmostpheric pressure in kPa for station elevation. For the above example
 altitude (109m) returns 100.0kpa. Atmospheric pressure is also available through
-*station.atmospheric_pressure()* call. In fact, *StationDay.atmospheric_pressure()*
+*station.atmospheric_pressure()* call. In fact, *DayEntry.atmospheric_pressure()*
 is just an alias to it.
 
 Value returned is a pressure in *kPa*. If you wish to convert it to mercury

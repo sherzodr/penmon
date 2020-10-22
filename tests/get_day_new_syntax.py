@@ -8,10 +8,10 @@ import unittest
 
 class Test(unittest.TestCase):
     
-    import penmon.eto as pm
+    import penmon as pm
     station=pm.Station(41.42, 109)
 
-    def testName(self):
+    def test_name(self):
         #day_228 = self.station.get_day(228, temp_min=19.5, temp_max=25.6, humidity_mean=60, wind_speed=2.35)
         
         day_228 = self.station.get_day(228)

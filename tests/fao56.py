@@ -11,8 +11,7 @@ I had to standardadize floating point arithmetic for the purposes of consistency
 
 '''
 import unittest
-from penmon.eto import Station, Climate, StationDay
-
+from penmon import Station, Climate, DayEntry
 
 class Test(unittest.TestCase):
 
@@ -32,7 +31,8 @@ class Test(unittest.TestCase):
         """Testing station's 'day()' method"""
         day = self.station.day(130)
         self.assertEqual(day.day_number, 130, "Station.day.day_number")
-        self.assertIsInstance(day, StationDay, "staion.day is instance of StationDay")
+        #print(type(day))
+        self.assertIsInstance(day, DayEntry, "staion.day is instance of " )
 
     def test_atmospheric_pressure(self):
         station = Station(41.42, 1800)

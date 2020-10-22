@@ -12,8 +12,7 @@ Homepage of the project: https://github.com/sherzodr/penmon
 
 """
 
-import math
-import datetime as dt
+import math, datetime as dt
 
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
@@ -138,7 +137,7 @@ class Station:
         if not (day_number >= 1 and day_number <= 366):
             raise Exception("'day_number' must be between in the range 1-366")
 
-        day = StationDay(day_number, self)
+        day = DayEntry(day_number, self)
 
         self.days[day_number] = day
         day.temp_min = temp_min
@@ -180,7 +179,7 @@ class Station:
         return self
 
 
-class StationDay:
+class DayEntry:
     """
     Represents a single day retrieved from the Station.
 
@@ -660,7 +659,6 @@ class StationDay:
         eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
         return round(eto_nominator / eto_denominator, 2)
 
-
 class Climate:
     """ 
     Represents a default climate according to *UN-FAO Paper 56*. If 
@@ -820,3 +818,23 @@ class Crop:
         self.resistance_a = resistance_a
         self.albedo = albedo
         self.height = height
+
+class StationDay(DayEntry):
+    """
+    Left here for backwards-compatability with earlier versions of 
+    the library
+    """
+
+    pass
+
+class MonthEntry:
+    def __init__(self):
+        pass
+
+class WeekEntry:
+    def __init__(self):
+        pass
+
+class HourEntry:
+    def __init__(self):
+        pass
