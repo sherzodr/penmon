@@ -164,6 +164,12 @@ class Station:
 
         return day
 
+    def atmospheric_pressure(self):
+        """
+        Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
+        """
+        return round(101.3 * ((293 - 0.0065 * self.altitude) / 293) ** 5.26, 2)
+    
     def describe(self):
         """
         Describes the station and all its assumptions in human-friendly text
@@ -284,7 +290,7 @@ class StationDay:
         """
         Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
         """
-        return round(101.3 * ((293 - 0.0065 * self.station.altitude) / 293) ** 5.26, 1)
+        return self.station.atmospheric_pressure();
 
     def latent_heat_of_vaporization(self):
         """
@@ -602,7 +608,7 @@ class StationDay:
         """
 
         return round(100 * (self.actual_vapour_pressure() /
-                            self.saturation_vapour_pressure(T)), 2)
+                            self.saturation_vapour_pressure(T)), 3)
 
     def soil_heat_flux(self):
         """

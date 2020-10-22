@@ -31,13 +31,18 @@ class Test(unittest.TestCase):
         station = Station(41.42, 1800)
         station.climate = Climate()
         day = station.day(130)
-        self.assertEqual(day.atmospheric_pressure(), 81.8, "Atmosphertic pressure")
+        self.assertEqual(round(day.atmospheric_pressure(), 1), 81.8, "Atmosphertic pressure")
         
+    def test_station_atmospheric_pressure(self):
+        station = Station(41.42, 1800)
+        self.assertEqual(round(station.atmospheric_pressure(), 1), 81.8, "Atmosphertic pressure")
+
+
     def test_psychrometric_constant(self):
         station = Station(41.42, 1800)
         station.climate = Climate()
         day = station.day(130)
-        self.assertEqual(day.psychrometric_constant(), 0.054397, "psychrometric constant")
+        self.assertEqual(day.psychrometric_constant(), 0.05437, "psychrometric constant")
 
     def test_specific_heat(self):
         day = self.station.day(130)
@@ -56,7 +61,7 @@ class Test(unittest.TestCase):
     def test_RH(self):
         day = self.station.day(130) 
         day.temp_dew = 19.5
-        self.assertEqual(day.RH(35), 40.32, "We can calculate relative humidity for a given T if dew point is known")
+        self.assertEqual(round(day.RH(35), 2), 40.32, "We can calculate relative humidity for a given T if dew point is known")
 
     def test_mean_saturation_vp2(self):
         day = self.station.day(130)
@@ -78,6 +83,7 @@ class Test(unittest.TestCase):
         self.assertEqual(day.saturation_vapour_pressure(19.5), 2.267)
         self.assertEqual(day.temp_dew, None, "No dew point temperature known")
         self.assertEqual(day.actual_vapour_pressure(), 1.91, "Actual vapour pressure from psychrometric data")
+
     def test_actual_vapour_pressure_dew(self):
         station = Station(41.42, 1200)
         station.climate = Climate()
@@ -293,7 +299,7 @@ class Test(unittest.TestCase):
         self.assertEqual(day.slope_of_saturation_vapour_pressure(23), 0.169921)
         self.assertEqual(day.net_radiation(), 16.1)
         self.assertEqual(day.soil_heat_flux(), 0)
-        self.assertEqual(day.psychrometric_constant(), 0.0665)
+        self.assertEqual(round(day.psychrometric_constant(), 4), 0.0665)
         self.assertEqual(day.wind_speed_2m(), 2)
         self.assertEqual(day.vapour_pressure_deficit(), 2.186)
 

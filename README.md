@@ -10,17 +10,17 @@ penmon.eto - Implementation of Penman-Monteith ETo Equation in Python.
 
     import penmon.eto as pm
     
-    # create a station class with known location and elevation
+    ### create a station class with known location and elevation
     station = pm.Station(latitude=41.42, altitude=109)
     station.anemometer_height = 10
 
-	# getting a day instance for August 16th
+	### getting a day instance for August 16th
     day = station.get_day(238, 
-    		temp_min=19.5, 
-    		temp_max=25.6, 
-    		wind_speed=2.5,
-    		humidity_mean=65,
-    		radiation_s=25.6
+    		temp_min = 19.5, 
+    		temp_max = 25.6, 
+    		wind_speed = 2.5,
+    		humidity_mean = 65,
+    		radiation_s =2 5.6
     		)
     print("ETo for this day is", day.eto() )
 
@@ -60,26 +60,29 @@ This is pre-release version of the library and intended for review only. API of
 the class may change in future releases. Do not assume backwards compatability 
 in future releases. Consults **CHANGES** file before upgrading!
 
-# CREATE A STATION
+# Station CLASS
+
+## CREATE A STATION instance
 
 	import penmon.eto as pm
+
 	station = pm.Station(latitude=41.42, altitude=109)
 
 *latitude* must be a float between -90 and 90. *altitudu* must be a positive 
 integer. These arguments values are of utmost importance. Please make sure these 
-data are as accurate as you can get them be. 
+data are as accurate as you can get them be. *latitude* is used to calculate 
+**sunset hour angle** (Eq. 25) and **Extraterrestrial radiation** (Eq. 21), 
+which in turn, along with date, is used to calculate solar radiation!
 
-*latitude* is used to calculate **sunset hour angle** (Eq. 25) and 
-**Extraterrestrial radiation** (Eq. 21), which in turn, along with date, is used to 
-calculate solar radiation!
-
-*altitude* is used to calculate atmospheric pressure, which in turn is used to 
-calculate psychrometric constant, which in turn is used to calculate vapour pressure,
-which is used to calculate Net longwave radiation. As you can see, these 
+*altitude* is used to calculate **atmospheric pressure**, which in turn is used to 
+calculate **psychrometric constant**, which in turn is used to calculate **vapour pressure**,
+which is used to calculate **net longwave radiation**. As you can see, these 
 very innocent looking numbers are pretty much backbone of the whole equation.
 Show them respect!
 
-Above **station** assumes its anemometer height is located 2m above ground surface.
+## ANEMOMETER HEIGHT
+
+Above *station* assumes its anemometer height is 2m above ground surface.
 If it's not, you can set the height as:
 
 	station.anemometer_height = 10
@@ -96,13 +99,13 @@ access calculated wind speed at 2m use *wind_speed_2m()* method:
 In the above example *u2m* returns *2.0* if the anemometer was set to 2 meters.
 If it was set to 10m, it returns 1.5. If it was set to 50 meters, it reads 1.2 m/s.
 	
+## STATION CLIMATE
+
 Station also makes certain assumptions about its climate. You can set this
 by creating a new climate instance (see **Climate** class) and set is as:
 
     humid_climate = pm.Climate().humid().coastal().strong_winds()
-    
     arid_climate = pm.Climate().arid().interior().moderare_winds()
-    
     station.climate = humid_climate
 
 By default it assumes we are in *arid, interior location, with moderate winds*.
@@ -115,42 +118,57 @@ we set dew_point temperature 4.0 below temp_min
 
     climate=pm.Climate() 
     # above is the same as saying:
-    # climate=pm.Climate().arid().interior().moderate_winds()
+    climate=pm.Climate().arid().interior().moderate_winds()
     
     climate.dew_point_difference=4.0
     
     station.climate=climate;
-    
+
     # from now on if humidity data is missing it substtracts 4.0 degrees
     from temp_min to take a guess at temp_dew
+    
+## REFERENCE CROP
 
-It also assumes it will be calculating ETO for a refernce crop. According
-to the original paper is assumed to be grass of 0.12m height, aerodynamic 
-resistance of 208 and albedo of 0.23. It you wish to calculate ETo for a 
-different reference crop you may do so as:
+It assumes it will be calculating ETo for a refernce crop. According
+to the original paper reference crop is assumed to be grass of 0.12m height, 
+aerodynamic resistance of 70 and albedo of 0.23. It you wish to calculate ETo 
+for a different reference crop you may do so as:
 
 	different_crop = pm.Crop(resistance_a=208, albedo=0.23, height=0.12)
 	station.ref_crop = different_crop
 	
-This station has no climate data available at this moment. But if it were 
-you would've been able to iterate through these records like following:
+## ITERATE THROUGH INDIVIDUAL ENTRIES
+	
+Based on the above example this station has no climate data available at this 
+moment. But if it were you would've been able to iterate through these records 
+like following:
 
 	for a_day in station.days:
 		# do stuff with a_day
-		
+
 # StationDay class
 
-Once we have station data available we work on a day at a time. We first
+Once we have station data available we work with a day at a time. We first
 need to get a single day, identified by a day number:
 
 	day = station.get_day(238)
 	
 *day* is an instance of **StationDay** class. *238* above represents
-August 26th - it is 238th day of the year. So day number can only be an integer
+*August 26th* - it is 238th day of the year. Day number can only be an integer
 in 1-366 range. It also supports a date string:
 
 	day = station.get_day("2020-08-26")
 	day.day_number # returns 238
+	
+If you have to pass a date string that has a different template than "%Y-%m-%d", 
+you can pass your template string to the method as follows. Above example assumes
+following default *date_template* value:
+
+    day = station.get_day("2020-08-26", date_template="%Y-%m-%d")
+    
+To learn more about date template placeholders refer to *strptime()* manual either
+from *datetime* module, or by refering to your system's *strptime* manual 
+(available in all linux/unix machines).
 
 Based on this day number alone library is able to calculate inverse
 of the relative Sun-Earth distance (Eq. 23), solar declination (Eq. 24), 
@@ -179,9 +197,8 @@ Everyday has following attributes:
 	# following are optional, if above attributes are known
 	- radiation_a
 	- temp_mean
-	- temp_dry
-	- temp_wet
-	
+	- temp_dry     - dry bulb temperature
+	- temp_wet     - wet bulb temperature
 	
 ## INTERMEDIATE CALCULATIONS
 	
@@ -191,7 +208,13 @@ mostly astronomical calculations.
 
 ### day.atmospheric_pressure()
 
-Returns atmostpheric pressure in kPa for station elevation.
+Returns atmostpheric pressure in kPa for station elevation. For the above example
+altitude (109m) returns 100.0kpa. Atmospheric pressure is also available through
+*station.atmospheric_pressure()* call. In fact, *StationDay.atmospheric_pressure()*
+is just an alias to it.
+
+Value returned is a pressure in *kPa*. If you wish to convert it to mercury
+scale multiply it by *7.50* to get *mm Hg*, or *0.295* to get *in Hg*.
 
 ### day.latent_heat_of_vaporization()
 
@@ -221,11 +244,16 @@ Returns inverse of relative Earth-Sun distance. For this example returns 0.981
 
 ### day.solar_declination()
 
-For this example returns 0.172
+For this example returns 0.172. This is angle in radians. To convert this to 
+degrees multiply by 180 and devide to *math.pi()*. For example, 0.172 rad is the
+same as 9.8 degrees. So Sun's declination was 9.8 degrees north relative to equatorial
+plane. If the value were negative it would've meant the Sun is declined to the 
+south of the equatorial plane.
 
 ### day.sunset_hour_angle()
 
-For this example, returns 1.725
+For this example, returns 1.725. See *day.solar_declination* to convert this
+to degrees.
 
 ### day.R_a()
 
