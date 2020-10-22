@@ -12,10 +12,12 @@ Homepage of the project: https://github.com/sherzodr/penmon
 
 """
 
-import math, datetime as dt
+import math
+import datetime as dt
 
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
+
 
 def is_number(s):
     try:
@@ -23,6 +25,7 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
 
 class Station:
     """ Class that implements a weather station at a known latitude and elevation."""
@@ -50,10 +53,10 @@ class Station:
          * climate - set to default **Climate()** instance
          * ref_crop - instance of **Crop** class, which sets default chracteristics
                       of the reference crop according to the paper.
-                      
+
         Should you wish to change assumes Climate and Crop characteristics
         you can do so after the object is innitialized, like so:
-        
+
             station=Station(41.42, 109)
             station.ref_crop = Crop(albedo=0.25, height=0.35)
         """
@@ -142,7 +145,7 @@ class Station:
         self.days[day_number] = day
         day.temp_min = temp_min
         day.temp_max = temp_max
-        day.temp_mean=temp_mean
+        day.temp_mean = temp_mean
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
 
@@ -171,7 +174,7 @@ class Station:
         Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
         """
         return round(101.3 * ((293 - 0.0065 * self.altitude) / 293) ** 5.26, 2)
-    
+
     def describe(self):
         """
         Describes the station and all its assumptions in human-friendly text
@@ -292,7 +295,7 @@ class DayEntry:
         """
         Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
         """
-        return self.station.atmospheric_pressure();
+        return self.station.atmospheric_pressure()
 
     def latent_heat_of_vaporization(self):
         """
@@ -563,9 +566,10 @@ class DayEntry:
         """
         Net longwave radiation. (Eq. 39)
         """
-        
-        if not ( self.temp_max and self.temp_min ):
-            raise Exception("Net longwave radiation cannot be calculated without min/max temperature")
+
+        if not (self.temp_max and self.temp_min):
+            raise Exception(
+                "Net longwave radiation cannot be calculated without min/max temperature")
 
         TmaxK = self.temp_max + 273.16
         TminK = self.temp_min + 273.16
@@ -583,10 +587,10 @@ class DayEntry:
         Net Radiation. (Eq. 40)
         """
         ns = self.R_ns()
-        
-        try: 
+
+        try:
             nl = self.R_nl()
-        except Exception as e: 
+        except Exception as e:
             raise(str(e))
 
         if (not ns is None) and (not nl is None):
@@ -638,7 +642,6 @@ class DayEntry:
         if not self.wind_speed_2m():
             return self.eto_hargreaves()
 
-
         if self.Tmean() == None:
             raise Exception(
                 "Cannot calculate eto(): temp_mean (mean temperature) is missing")
@@ -648,7 +651,7 @@ class DayEntry:
         except Exception as e:
             raise(str(e))
 
-        Tmean=self.Tmean()
+        Tmean = self.Tmean()
         slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
         G = self.soil_heat_flux()
         u2m = self.wind_speed_2m()
@@ -658,6 +661,7 @@ class DayEntry:
 
         eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
         return round(eto_nominator / eto_denominator, 2)
+
 
 class Climate:
     """ 
@@ -819,6 +823,7 @@ class Crop:
         self.albedo = albedo
         self.height = height
 
+
 class StationDay(DayEntry):
     """
     Left here for backwards-compatability with earlier versions of 
@@ -827,13 +832,16 @@ class StationDay(DayEntry):
 
     pass
 
+
 class MonthEntry:
     def __init__(self):
         pass
 
+
 class WeekEntry:
     def __init__(self):
         pass
+
 
 class HourEntry:
     def __init__(self):
