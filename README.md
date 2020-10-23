@@ -335,8 +335,15 @@ Recording solar radiation gets us the most accurate ETo:
  * Module only implements daily calculations. It does not support hourly or monthly
 observations at this time.
 
+# SEE ALSO
+
+
+*libpenmon* - port of the current module into C++. See [github.com/sherzodr/libpenmon][2]
+
+
 # AUTHOR
 
  Sherzod Ruzmetov <sherzodr@gmail.com>
  
  [1]: http://www.fao.org/3/X0490E/x0490e00.htm
+ [2]: https://github.com/sherzodr/libpenmon
