@@ -157,7 +157,6 @@ class Test(unittest.TestCase):
     def test_latitude_rad(self):
         station_bangkok = Station(13.73, 1200)
         self.assertEqual(station_bangkok.latitude_rad, 0.240)
-        
         station_rio = Station(22.90, 1200)
         self.assertEqual(station_rio.latitude_rad, 0.400)
 

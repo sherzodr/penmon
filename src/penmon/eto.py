@@ -244,7 +244,7 @@ class DayEntry:
         self.temp_dry = None
         self.temp_wet = None
         self.climate = station.climate
-        self.stephan_boltzmann_constant = 4.903 * 10 ** (-9)
+        self.stephan_boltzmann_constant = 4.903 * (10 ** -9)
         self.vapour_pressure = None
         self.sunshine_hours = None
 
@@ -441,12 +441,20 @@ class DayEntry:
         Extraterrestrial radiation for daily periods.( Eq. 21 ).
         """
 
-        return round((24 * 60 / math.pi) * 0.0820 * self.relative_sun_distance()
-                     * (self.sunset_hour_angle() * math.sin(self.station.latitude_rad) *
-                        math.sin(self.solar_declination()) +
-                        math.cos(self.station.latitude_rad) *
-                        math.cos(self.solar_declination()) *
-                        math.sin(self.sunset_hour_angle())), 1)
+        return round(
+            24 * 60 / math.pi * 0.0820 * self.relative_sun_distance() *
+            (
+                (
+                self.sunset_hour_angle() * math.sin(self.station.latitude_rad) *
+                math.sin(self.solar_declination())
+                ) +
+                (
+                 math.cos(self.station.latitude_rad) *
+                 math.cos(self.solar_declination()) *
+                 math.sin(self.sunset_hour_angle())
+                )
+             ), 
+            1)
 
     def R_a_in_mm(self):
         """
