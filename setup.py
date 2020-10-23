@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="penmon",
-    version="0.2.1",
+    version="1.0",
     description="Implementation of Penman-Monteith equation to calculate ET for a reference crop",
     # long_description_content_type="text/markdown",
     # long_description=long_description,
@@ -11,7 +11,7 @@ setup(
     author_email="sherzodr@gmail.com",
     license="MIT",
     url="https://github.com/sherzodr/penmon",
-    download_url="https://github.com/sherzodr/penmon/archive/0.2.1.tar.gz",
+    download_url="https://github.com/sherzodr/penmon/archive/1.0.tar.gz",
     py_modules=["penmon.eto"],
     package_dir={'': 'src'},
     packages=["penmon"],
