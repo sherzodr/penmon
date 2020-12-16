@@ -4,7 +4,7 @@ Created on Sep 30, 2020
 @author: sherzodr
 '''
 import unittest
-import penmon.eto as pm
+import penmon as pm
 
 
 class Test(unittest.TestCase):

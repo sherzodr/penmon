@@ -14,7 +14,7 @@ solar_radiation      3.21356
 
 '''
 import unittest
-import penmon.eto as pm
+import penmon as pm
 
 class Test(unittest.TestCase):
 

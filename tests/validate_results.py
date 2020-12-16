@@ -1,5 +1,5 @@
 import unittest
-from penmon.eto import Station
+from penmon import Station
 
 class Test(unittest.TestCase):
 
