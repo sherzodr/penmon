@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
             }
 
         for day_number, wdata in data.items():
-            day = station.get_day(day_number)
+            day = station.day_entry(day_number)
             day.temp_min = wdata[0]
             day.temp_max = wdata[1]
             day.wind_speed = 2
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         station = Station(41.42, 109)
         station.climate = None
         
-        day = station.get_day(228)  # august 16
+        day = station.day_entry(228)  # august 16
         day.temp_min = 19.8
         day.temp_max = 29.9
         day.radiation_s = 264 * 0.0864

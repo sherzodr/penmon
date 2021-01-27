@@ -16,7 +16,7 @@ Penman-Monteith ETo Equation.
     station.anemometer_height = 10
 
 	### getting a day instance for August 16th
-    day = station.get_day(238, 
+    day = station.day_entry(238, 
     		temp_min = 19.5, 
     		temp_max = 25.6, 
     		wind_speed = 2.5,
@@ -152,20 +152,20 @@ like following:
 Once we have station data available we work with a day at a time. We first
 need to get a single day, identified by a day number:
 
-	day = station.get_day(238)
+	day = station.day_entry(238)
 	
 *day* is an instance of **DayEntry** class. *238* above represents
 *August 26th* - it is 238th day of the year. Day number can only be an integer
 in 1-366 range. It also supports a date string:
 
-	day = station.get_day("2020-08-26")
+	day = station.day_entry("2020-08-26")
 	day.day_number # returns 238
 	
 If you have to pass a date string that has a different template than "%Y-%m-%d", 
 you can pass your template string to the method as follows. Above example assumes
 following default *date_template* value:
 
-    day = station.get_day("2020-08-26", date_template="%Y-%m-%d")
+    day = station.day_entry("2020-08-26", date_template="%Y-%m-%d")
     
 To learn more about date template placeholders refer to *strptime()* manual either
 from *datetime* module, or by refering to your system's *strptime* manual 

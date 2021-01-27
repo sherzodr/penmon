@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
 
     def test_bug(self):
         station = pm.Station(37.31, 263)
-        day = station.get_day("1979-01-11")
+        day = station.day_entry("1979-01-11")
         day.temp_min=1.247
         day.temp_max=3.10
         day.humidity_mean=85.34

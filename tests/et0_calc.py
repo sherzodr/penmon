@@ -4,7 +4,7 @@ class Test(unittest.TestCase):
 
     def test_daylight_hours(self):
         station = pm.Station(41.42, 109)
-        day = station.day(135)
+        day = station.day_entry(135)
         day.temp_min = 19.5
         day.temp_max = 28
 

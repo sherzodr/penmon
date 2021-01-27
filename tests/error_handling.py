@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
     def test_day_number_type(self):
         station = pm.Station(latitude=41.42, altitude=109)
         try:
-            station.get_day(365.0)
+            station.day_entry(365.0)
         except TypeError:
             self.assertTrue(True, "Exception was expected and raised")
         else:
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
         station = pm.Station(latitude=41.42, altitude=109)
 
         try:
-            station.get_day(367)
+            station.day_entry(367)
         except:
             self.assertTrue(True, "Exception was expected and raised")
         else:
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
 
     def test_immature_eto(self):
         station = pm.Station(41.42, 109)
-        day = station.get_day(238, temp_mean=25.00)
+        day = station.day_entry(238, temp_mean=25.00)
         self.assertTrue(day.temp_mean != None, "temp_mean was set")
         self.assertEqual(day.temp_mean, day.Tmean())
         

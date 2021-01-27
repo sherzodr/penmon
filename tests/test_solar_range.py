@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         self.assertTrue(pm.CHECK_RADIATION_RANGE)
 
         try:
-            day = station.get_day("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
+            day = station.day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
             self.assertTrue(day.eto())
         except Exception as e:
             self.assertTrue(True, "Out of range ValueError caught: " + str(e))
@@ -26,14 +26,14 @@ class Test(unittest.TestCase):
         station = pm.Station(41.42, 109)
 
         try:
-            day = station.get_day("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=35)
+            day = station.day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=35)
             self.assertTrue(day.eto())
         except ValueError:
             self.assertTrue(True, "out of range ValueError caught")
             
         else:
             self.assertTrue(False, "out of range ValueError NOT caught")
-            day = station.get_day("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
+            day = station.day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
 
     def test_no_solar_range_test(self):
         
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         self.assertTrue(pm.CHECK_RADIATION_RANGE == False, "CHECK_RADIATION_RANGE defaults to True")
         
         try:
-            day = pm.Station(41.42, 109).get_day("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=35)
+            day = pm.Station(41.42, 109).day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=35)
             self.assertTrue(day.eto() > 0)
         except:
             self.assertTrue(False, "out of range exception raised")
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
 
     def test_check_sunshine_hours_range(self):
         try:
-            day = pm.Station(41.42, 109).get_day("2019-12-21", sunshine_hours=15, temp_min=19.8, temp_max=29.9)
+            day = pm.Station(41.42, 109).day_entry("2019-12-21", sunshine_hours=15, temp_min=19.8, temp_max=29.9)
             self.assertTrue(day.eto())
         except Exception as e: 
             self.assertTrue(True, str(e))
@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
         pm.CHECK_SUNSHINE_HOURS_RANGE = False
         
         try:
-            day = pm.Station(41.42, 109).get_day("2019-12-21", temp_min=-5, temp_max=5.50, sunshine_hours=15)
+            day = pm.Station(41.42, 109).day_entry("2019-12-21", temp_min=-5, temp_max=5.50, sunshine_hours=15)
             self.assertTrue(day.eto())
         except Exception as e:
             self.assertTrue(False, str(e))

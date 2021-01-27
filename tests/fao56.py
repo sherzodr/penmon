@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
 
     station = Station(41.42, 109)
     station.climate = Climate()
-    day_130 = station.day(130)
+    day_130 = station.day_entry(130)
 
     def test_station_class(self):
         """Testing Station instance attributes"""
@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
 
     def test_station_day(self):
         """Testing station's 'day()' method"""
-        day = self.station.day(130)
+        day = self.station.day_entry(130)
         self.assertEqual(day.day_number, 130, "Station.day.day_number")
         #print(type(day))
         self.assertIsInstance(day, DayEntry, "staion.day is instance of " )
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
     def test_atmospheric_pressure(self):
         station = Station(41.42, 1800)
         station.climate = Climate()
-        day = station.day(130)
+        day = station.day_entry(130)
         self.assertEqual(round(day.atmospheric_pressure(), 1), 81.8, "Atmosphertic pressure")
         
     def test_station_atmospheric_pressure(self):
@@ -48,15 +48,15 @@ class Test(unittest.TestCase):
     def test_psychrometric_constant(self):
         station = Station(41.42, 1800)
         station.climate = Climate()
-        day = station.day(130)
+        day = station.day_entry(130)
         self.assertEqual(day.psychrometric_constant(), 0.05437, "psychrometric constant")
 
     def test_specific_heat(self):
-        day = self.station.day(130)
+        day = self.station.day_entry(130)
         self.assertEqual(day.specific_heat(), 1.013 * 10 ** (-3))
 
     def test_latent_heat_of_vaporization(self):
-        day = self.station.day(130)
+        day = self.station.day_entry(130)
         self.assertEqual(day.latent_heat_of_vaporization(), 2.45)
 
     def test_mean_saturation_vp(self):
@@ -66,24 +66,24 @@ class Test(unittest.TestCase):
         self.assertEqual(day_130.mean_saturation_vapour_pressure(), 2.39, "mean_saturation_vapour_pressure()")
         
     def test_RH(self):
-        day = self.station.day(130) 
+        day = self.station.day_entry(130) 
         day.temp_dew = 19.5
         self.assertEqual(round(day.RH(35), 2), 40.32, "We can calculate relative humidity for a given T if dew point is known")
 
     def test_mean_saturation_vp2(self):
-        day = self.station.day(130)
+        day = self.station.day_entry(130)
         day.temp_mean = 19.75
         self.assertEqual(day.mean_saturation_vapour_pressure(), 2.302, "mean_saturation_vapour_pressure using just Tmean")
         
     def test_slope_of_saturation_vp(self):
-        day = self.station.day(130)
+        day = self.station.day_entry(130)
         slope = day.slope_of_saturation_vapour_pressure(24.5)
         self.assertEqual(slope, 0.183837, "slope of vapour pressure curve")
         
     def test_actual_vapour_pressure_psychrometric(self):
         station = Station(41.42, 1200)
         station.climate = Climate()
-        day = station.day(130)
+        day = station.day_entry(130)
         day.temp_wet = 19.5
         day.temp_dry = 25.6
         self.assertEqual(day.atmospheric_pressure(), 87.9, 87.9)
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
     def test_actual_vapour_pressure_dew(self):
         station = Station(41.42, 1200)
         station.climate = Climate()
-        day = station.day(130)
+        day = station.day_entry(130)
 
         self.assertEqual(day.temp_dew, None, "Dew temp is not known")
         day.temp_dew = 17.0
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
         station = Station(41.42, 1200)
         station.climate = Climate()
 
-        day = station.day(130)
+        day = station.day_entry(130)
         day.temp_min = 18
         day.temp_max = 25
         day.humidity_max = 82
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
     def test_actual_vapour_pressure_humidity_max_temp_min(self):
         station = Station(41.42, 1200)
 
-        day = station.day(130)
+        day = station.day_entry(130)
         day.temp_min = 18
         day.humidity_max = 82
 
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
     def test_actual_vapour_pressure_humidity_mean(self):
         station = Station(41.42, 1200)
 
-        day = station.day(130)
+        day = station.day_entry(130)
         day.temp_min = 18
         day.temp_max = 25
         day.humidity_mean = 68
@@ -145,7 +145,7 @@ class Test(unittest.TestCase):
     def test_vapour_pressure_deficit(self):
         station = Station(41.42, 1200)
         
-        day = station.day(130)
+        day = station.day_entry(130)
         day.temp_min = 18
         day.temp_max = 25
         day.humidity_max = 82
@@ -161,38 +161,38 @@ class Test(unittest.TestCase):
         self.assertEqual(station_rio.latitude_rad, 0.400)
 
     def test_relative_sun_distance(self):
-        dr = self.station.day(246).relative_sun_distance()
+        dr = self.station.day_entry(246).relative_sun_distance()
         self.assertEqual(dr, 0.985)
         
     def test_solar_declination(self):
-        declination = self.station.day(246).solar_declination()
+        declination = self.station.day_entry(246).solar_declination()
         self.assertEqual(declination, 0.120)
 
     def test_sunset_hour_angle(self):
         station = Station(-20.0, 1200)
-        sunset_angle = station.day(246).sunset_hour_angle()
+        sunset_angle = station.day_entry(246).sunset_hour_angle()
         self.assertEqual(sunset_angle, 1.527)
 
     def test_r_a(self):
-        r_a = Station(-20.0, 1200).day(246).R_a()
+        r_a = Station(-20.0, 1200).day_entry(246).R_a()
         self.assertEqual(r_a, 32.2)
 
     def test_r_a_in_mm(self):
-        r_a = Station(-20.0, 1200).day(246).R_a_in_mm()
+        r_a = Station(-20.0, 1200).day_entry(246).R_a_in_mm()
         self.assertEqual(r_a, 13.10)
 
     def test_daylight_hours(self):
-        hours = Station(-20.0, 1200).day(246).daylight_hours()
+        hours = Station(-20.0, 1200).day_entry(246).daylight_hours()
         self.assertEqual(hours, 11.7)
 
     def test_solar_radiation(self):
-        day=Station(-22.90,1200).day(135)
+        day=Station(-22.90,1200).day_entry(135)
         day.sunshine_hours = 7.10
         radiation = day.solar_radiation()
         self.assertEqual(radiation, 14.4)
         
     def test_clear_sky_solar_radiation(self):
-        day = Station(-22.90, 0).day(135)
+        day = Station(-22.90, 0).day_entry(135)
         day.sunshine_hours=7.1
         solar_radiation = day.solar_radiation()
         self.assertEqual(solar_radiation, 14.4)
@@ -201,13 +201,13 @@ class Test(unittest.TestCase):
         self.assertEqual(clear_sky_radiation, 18.8)
         
     def test_net_shortwave_radiation(self):
-        day = Station(-22.90, 1200).day(135)
+        day = Station(-22.90, 1200).day_entry(135)
         day.sunshine_hours=7.1
         r_ns = day.R_ns()
         self.assertEqual(r_ns, 11.1)
 
     def test_net_longwave_radiation(self):
-        day = Station(-22.90, 1200).day(135)
+        day = Station(-22.90, 1200).day_entry(135)
 
         day.temp_max = 25.1
         day.temp_min = 19.1
@@ -222,7 +222,7 @@ class Test(unittest.TestCase):
         self.assertEqual(r_nl, 3.5)
 
     def test_net_radiation(self):
-        day = Station(-22.90, 1200).day(135)
+        day = Station(-22.90, 1200).day_entry(135)
         day.temp_max = 25.1
         day.temp_min = 19.1
         day.vapour_pressure = 2.1
@@ -232,7 +232,7 @@ class Test(unittest.TestCase):
         self.assertEqual(net_radiation, 7.6)
         
     def test_wind_speed2m(self):
-        day = Station(-22.90, 1200).day(135)
+        day = Station(-22.90, 1200).day_entry(135)
         day.wind_speed = 5 
         
         self.assertEqual(day.wind_speed_2m(), 5)
@@ -242,7 +242,7 @@ class Test(unittest.TestCase):
         self.assertEqual(day.wind_speed_2m(), 2.4)
 
     def test_solar_radiation_from_temp(self):
-        day = Station(45.72, 200).day(196)
+        day = Station(45.72, 200).day_entry(196)
         day.temp_max = 26.6
         day.temp_min = 14.8
         
@@ -254,7 +254,7 @@ class Test(unittest.TestCase):
         self.assertEqual(day.solar_radiation_in_mm(), 9.1)
 
     def test_net_radiation_without_radiation_data(self):
-        day = Station(13.73, 2).day(105)
+        day = Station(13.73, 2).day_entry(105)
 
         climate = day.station.climate
         climate.coastal()
@@ -271,7 +271,7 @@ class Test(unittest.TestCase):
         self.assertEqual(net_radiation, 14.0)
         
     def test_solar_radiation_in_island(self):
-        day = Station(41.42, 10).day(105)
+        day = Station(41.42, 10).day_entry(105)
         day.station.climate.island()
         
         rs = day.solar_radiation()
@@ -288,7 +288,7 @@ class Test(unittest.TestCase):
         self.assertEqual(rs, 25.7)
 
     def test_eto_hargreaves(self):
-        day = Station(41.42, 109).day(295)
+        day = Station(41.42, 109).day_entry(295)
         day.temp_min = 19.5;
         day.temp_max = 26.5
         
@@ -296,7 +296,7 @@ class Test(unittest.TestCase):
         self.assertEqual(eto, 4.97)
 
     def test_eto(self):
-        day = Station(41.42, 109).day(150)
+        day = Station(41.42, 109).day_entry(150)
         day.temp_min = 19.5
         day.temp_max = 36.5
         day.wind_speed = 2

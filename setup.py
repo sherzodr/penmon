@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="penmon",
-    version="1.0",
+    version="1.1",
     description="Implementation of Penman-Monteith equation to calculate ET for a reference crop",
     # long_description_content_type="text/markdown",
     # long_description=long_description,

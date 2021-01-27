@@ -82,12 +82,8 @@ class Station:
         self.anemometer_height = anemometer_height
         self.climate = Climate()
         self.ref_crop = Crop()
-
-    def day(self, day_number):
-        """ See get_day()"""
-        return self.get_day(day_number)
-
-    def get_day(self, day_number, date_template="%Y-%m-%d",
+        
+    def day_entry(self, day_number, date_template="%Y-%m-%d",
                 temp_min=None,
                 temp_max=None,
                 temp_mean=None,
@@ -106,9 +102,9 @@ class Station:
         If your date format is different than assumed, you can adjust *date_template* 
         as the second parameter. For example, following all three lines are identical
 
-            day = station.get_day(229)
-            day = station.get_day("2020-08-16")
-            day = station.get_day('08/16/2020', '%m/%d/%Y')
+            day = station.day_entry(229)
+            day = station.day_entry("2020-08-16")
+            day = station.day_entry('08/16/2020', '%m/%d/%Y')
 
         You can pass the following named-parameters to the method:
 
@@ -169,6 +165,8 @@ class Station:
 
         return day
 
+    get_day = day_entry
+
     def atmospheric_pressure(self):
         """
         Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
@@ -187,7 +185,7 @@ class DayEntry:
     Represents a single day retrieved from the Station.
 
     This class is usually not instantiated directly. It's instantniated by the 
-    **Station()**'s get_day() method, passing all reuqired state data.
+    **Station()**'s day_entry() method, passing all reuqired state data.
 
     Since bulk of Penman-Moneith is concerned with a daily ETo **StationDay** is 
     heart of the module. Penman-Monteith equatoin is implemented within the 
@@ -623,6 +621,15 @@ class DayEntry:
 
         return round(100 * (self.actual_vapour_pressure() /
                             self.saturation_vapour_pressure(T)), 3)
+
+    def RH_mean(self):
+        
+        if self.humidity_mean != None:
+            return self.humidity_mean
+        
+        if self.temp_min and self.temp_max:
+            return int(round(( self.RH(self.temp_min) + self.RH(self.temp_max) ) / 2, 0))
+
 
     def soil_heat_flux(self):
         """
