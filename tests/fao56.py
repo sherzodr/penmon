@@ -219,7 +219,7 @@ class Test(unittest.TestCase):
         day.sunshine_hours = 7.1;
 
         r_nl = day.R_nl()
-        self.assertEqual(r_nl, 3.5)
+        self.assertEqual(r_nl, 3.3)
 
     def test_net_radiation(self):
         day = Station(-22.90, 1200).day_entry(135)
@@ -229,7 +229,7 @@ class Test(unittest.TestCase):
         day.sunshine_hours=7.1
 
         net_radiation = day.net_radiation()
-        self.assertEqual(net_radiation, 7.6)
+        self.assertEqual(net_radiation, 7.8)
         
     def test_wind_speed2m(self):
         day = Station(-22.90, 1200).day_entry(135)

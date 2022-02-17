@@ -18,7 +18,6 @@ import datetime as dt
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
 
-
 def is_number(s):
     try:
         float(s)
@@ -89,6 +88,8 @@ class Station:
                 temp_mean=None,
                 wind_speed=None,
                 humidity_mean=None,
+                humidity_min=None,
+                humidity_max=None,
                 radiation_s=None,
                 sunshine_hours=None
                 ):
@@ -142,6 +143,8 @@ class Station:
         day.temp_min = temp_min
         day.temp_max = temp_max
         day.temp_mean = temp_mean
+        day.humidity_min=humidity_min
+        day.humidity_max=humidity_max
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
 
@@ -332,7 +335,7 @@ class DayEntry:
         """
         Calculates saturation vapour pressure for a given temperature. (Eq. 11)
         """
-        return round((0.6108 * 2.7183 ** (17.27 * T / (T + 237.3))), 3)
+        return round((0.6108 * (2.7183 ** (17.27 * T / (T + 237.3)))), 3)
 
     def mean_saturation_vapour_pressure(self):
         """
@@ -430,9 +433,6 @@ class DayEntry:
 
         return round(math.acos(-1 * math.tan(self.station.latitude_rad) *
                                math.tan(self.solar_declination())), 3)
-        # return math.pi / 2 - math.atan(-1 *
-        # math.tan(self.station.latitutde_radians) *
-        # math.tan(self.solar_declination()) / ( self.X() ** 0.5 ))
 
     def R_a(self):
         """
@@ -556,7 +556,7 @@ class DayEntry:
         if self.station.altitude < 100:
             return round((0.25 + 0.50) * self.R_a(), 1)
 
-        return round((0.75 + (210 ** (-5)) * self.station.altitude) * self.R_a(), 1)
+        return round((0.75 + (2 * 10**(-5)) * self.station.altitude) * self.R_a(), 1)
 
     def R_ns(self):
         """
@@ -623,12 +623,24 @@ class DayEntry:
                             self.saturation_vapour_pressure(T)), 3)
 
     def RH_mean(self):
-        
+        """
+        If possible returns mean relative humidity for the day. If humidity_mean was logged in the station 
+        returns it as is. 
+        If min/max humidity values were logged at the station, computes
+        the mean of the two values
+        If none was logged, but min/max temperature values were logged it attempts to calculate
+        relative humidity through saturation vapour pressure:
+        """
         if self.humidity_mean != None:
             return self.humidity_mean
         
-        if self.temp_min and self.temp_max:
+        if (self.humidity_min != None) and (self.humidity_max != None):
+            return round( ( self.humidity_max + self.humidity_min ) / 2, 0 )
+        
+        if ( self.temp_min != None ) and ( self.temp_max != None ):
             return int(round(( self.RH(self.temp_min) + self.RH(self.temp_max) ) / 2, 0))
+        
+        return None
 
 
     def soil_heat_flux(self):
@@ -670,9 +682,11 @@ class DayEntry:
         slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
         G = self.soil_heat_flux()
         u2m = self.wind_speed_2m()
-        eto_nominator = (0.408 * slope_of_vp * (net_radiation - G) +
+        eto_nominator = (
+                        ( 0.408 * slope_of_vp * (net_radiation - G) ) +
                          self.psychrometric_constant() * (900 / (Tmean + 273)) * u2m *
-                         self.vapour_pressure_deficit())
+                         self.vapour_pressure_deficit()
+                         )
 
         eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
         return round(eto_nominator / eto_denominator, 2)

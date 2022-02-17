@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
     def test_solar_radiation_range(self):
         station = pm.Station(41.42, 109)
         
-        self.assertTrue(pm.CHECK_RADIATION_RANGE)
+        self.assertTrue(pm.CHECK_RADIATION_RANGE == True)
 
         try:
             day = station.day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
@@ -30,7 +30,6 @@ class Test(unittest.TestCase):
             self.assertTrue(day.eto())
         except ValueError:
             self.assertTrue(True, "out of range ValueError caught")
-            
         else:
             self.assertTrue(False, "out of range ValueError NOT caught")
             day = station.day_entry("2020-08-16", temp_min=19.8, temp_max=29.9, radiation_s=27.5)
