@@ -4,11 +4,10 @@ Created on Oct 5, 2020
 @author: sherzodr
 '''
 import unittest
-
+import penmon as pm
 
 class Test(unittest.TestCase):
     
-    import penmon as pm
     station=pm.Station(41.42, 109)
 
     def test_name(self):
