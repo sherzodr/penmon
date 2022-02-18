@@ -317,23 +317,11 @@ Recording solar radiation gets us the most accurate ETo:
 	day.radiation_s = 25.0
 	day.eto() # returns 5.04m	
 	
-# TODO
+# TODO AND ISSUES
 
- * rounding consistency. Currently rounding of decimal points for floating point numbers
-   follow the [original paper][1]'s usage examples. I did so in order to be able
-   to test examples used in the paper. However this is far from ideal. This
-   issue of significant digits must be revisited in future revisions!
 
- * *import_data()* must be supported by *penmon.eto.Station* class to import
-   bulk data into the station.
- 
- * *export_data()* must be supported by *penmon.eto.Station* class to export
-   all the data (including intermediate results) into a .csv file. 
-   Options for exporting data into **AquaCrop** and **CropWat** systems must be
-   supported
- 
- * Module only implements daily calculations. It does not support hourly or monthly
-observations at this time.
+See: [Issues at github.com][3]
+
 
 # SEE ALSO
 
@@ -347,3 +335,4 @@ observations at this time.
  
  [1]: http://www.fao.org/3/X0490E/x0490e00.htm
  [2]: https://github.com/sherzodr/libpenmon
+ [3]: https://github.com/sherzodr/penmon/issues
