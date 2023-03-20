@@ -1,13 +1,13 @@
-'''
+"""
 Created on Sep 30, 2020
 
 @author: sherzodr
-'''
+"""
+from penmon import eto as pm
 import unittest
-import penmon as pm
+
 
 class Test(unittest.TestCase):
-
     def test_smoke(self):
         station = pm.Station(latitude=41.42, altitude=109)
         self.assertIsInstance(station, pm.Station, "Smoke test passed")
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
         day = station.day_entry(238, temp_mean=25.00)
         self.assertTrue(day.temp_mean != None, "temp_mean was set")
         self.assertEqual(day.temp_mean, day.Tmean())
-        
+
         # following code should raise an exception:
         try:
             day.eto()
@@ -68,6 +68,7 @@ class Test(unittest.TestCase):
             self.assertTrue(True, str(e))
         else:
             self.assertTrue(False, "Exception was expected")
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
