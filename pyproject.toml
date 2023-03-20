@@ -1,6 +1,129 @@
+[tool.poetry]
+name = "penmon"
+version = "0.5.0"
+description = "Implements weather station class in Python that calculates ETo (reference crop's evapotranspiration) based on UN-FAO Irrigation and Drainage Paper 56"
+authors = ["Benjamin Schmidt <benschmidt@live.de>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+
+[tool.poetry.dev-dependencies]
+black = "^22.8.0"
+flake8 = "^5.0.4"
+pylint = "^2.15.2"
+
 [build-system]
-requires = [
-	"setuptools>=42",
-	"wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+python_executable = "python"
+
+[tool.pylint.main]
+fail-under = 10
+ignore = ["CVS"]
+ignore-patterns = ["^\\.#"]
+jobs = 1
+
+limit-inference-results = 100
+persistent = true
+
+py-version = "3.9"
+
+suggestion-mode = true
+
+
+[tool.pylint.basic]
+argument-naming-style = "snake_case"
+
+attr-naming-style = "snake_case"
+
+bad-names = ["foo", "bar", "baz", "toto", "tutu", "tata"]
+class-attribute-naming-style = "any"
+class-const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+class-rgx = "[A-Z][a-z]+"
+const-naming-style = "UPPER_CASE"
+docstring-min-length = -1
+function-naming-style = "snake_case"
+good-names = ["ax", "ds", "df", "i", "j", "k", "ex", "Run", "_"]
+inlinevar-naming-style = "any"
+method-naming-style = "snake_case"
+module-naming-style = "snake_case"
+no-docstring-rgx = "^_"
+property-classes = ["abc.abstractproperty"]
+variable-naming-style = "snake_case"
+
+[tool.pylint.classes]
+defining-attr-methods = ["__init__", "__new__", "setUp", "__post_init__"]
+exclude-protected = ["_asdict", "_fields", "_replace", "_source", "_make"]
+valid-classmethod-first-arg = ["cls"]
+valid-metaclass-classmethod-first-arg = ["cls"]
+
+[tool.pylint.design]
+# Maximum number of arguments for function / method.
+max-args = 5
+# Maximum number of attributes for a class (see R0902).
+max-attributes = 7
+# Maximum number of boolean expressions in an if statement (see R0916).
+max-bool-expr = 5
+# Maximum number of branch for function / method body.
+max-branches = 12
+# Maximum number of locals for function / method body.
+max-locals = 15
+# Maximum number of parents for a class (see R0901).
+max-parents = 7
+# Maximum number of public methods for a class (see R0904).
+max-public-methods = 20
+# Maximum number of return / yield for function / method body.
+max-returns = 6
+# Maximum number of statements in function / method body.
+max-statements = 50
+# Minimum number of public methods for a class (see R0903).
+min-public-methods = 2
+
+[tool.pylint.exceptions]
+# Exceptions that will emit a warning when caught.
+overgeneral-exceptions = ["BaseException", "Exception"]
+
+[tool.pylint.format]
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines = "^\\s*(# )?<?https?://\\S+>?$"
+indent-after-paren = 4
+indent-string = "    "
+max-line-length = 100
+max-module-lines = 1000
+
+[tool.pylint.logging]
+logging-modules = ["logging"]
+
+[tool.pylint.miscellaneous]
+# List of note tags to take in consideration, separated by a comma.
+notes = ["FIXME", "TODO", "NOTE"]
+
+[tool.pylint.refactoring]
+max-nested-blocks = 5
+never-returning-functions = ["sys.exit", "argparse.parse_error"]
+
+[tool.pylint.reports]
+evaluation = "max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))"
+score = true
+
+[tool.pylint.similarities]
+ignore-comments = true
+ignore-docstrings = true
+ignore-imports = true
+ignore-signatures = true
+min-similarity-lines = 4
+
+[tool.flake8]
+max-line-length = 100
+max-complexity = 10
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
