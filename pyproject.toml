@@ -2,7 +2,7 @@
 name = "penmon"
 version = "0.5.0"
 description = "Implements weather station class in Python that calculates ETo (reference crop's evapotranspiration) based on UN-FAO Irrigation and Drainage Paper 56"
-authors = ["Benjamin Schmidt <benschmidt@live.de>"]
+authors = ["Sherzod RUZMETOV <sherzodr@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
@@ -30,7 +30,7 @@ jobs = 1
 limit-inference-results = 100
 persistent = true
 
-py-version = "3.9"
+py-version = "3.7"
 
 suggestion-mode = true
 
