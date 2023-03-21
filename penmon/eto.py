@@ -18,19 +18,14 @@ import math
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
 
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
 
 class Station:
-    """ Class that implements a weather station at a known latitude and elevation."""
+    """Class that implements a weather station at a known latitude and elevation."""
 
     def __init__(self, latitude, altitude, anemometer_height=2):
         """
+        Instantiate Station object from latitude, altitude, and anemometer height.
+
         Required parameters:
 
         :param latitude: latitude of the location in decimal format. For southern
@@ -59,18 +54,17 @@ class Station:
             station=Station(41.42, 109)
             station.ref_crop = Crop(albedo=0.25, height=0.35)
         """
-
-        if not type(latitude) is float:
-            raise TypeError("latitude must be a float")
+        if type(latitude) is not float:
+            raise TypeError("'latitude' must be a float")
 
         if latitude < -90.0 or latitude > 90.0:
-            raise Exception("latitude must be between -90.0 and 90.0")
+            raise ValueError("'latitude' must be between -90.0 and 90.0")
 
-        if not type(altitude) is int:
-            raise TypeError("altitude must be an integer")
+        if type(altitude) is not int:
+            raise TypeError("'altitude' must be an integer")
 
         if altitude < 0:
-            raise Exception("'altitude' must be above 0")
+            raise ValueError("'altitude' must be above 0")
 
         self.latitude = latitude
         self.altitude = altitude
@@ -82,18 +76,23 @@ class Station:
         self.climate = Climate()
         self.ref_crop = Crop()
 
-    def day_entry(self, day_number, date_template="%Y-%m-%d",
-                temp_min=None,
-                temp_max=None,
-                temp_mean=None,
-                wind_speed=None,
-                humidity_mean=None,
-                humidity_min=None,
-                humidity_max=None,
-                radiation_s=None,
-                sunshine_hours=None
-                ):
+    def day_entry(
+        self,
+        day_number,
+        date_template="%Y-%m-%d",
+        temp_min=None,
+        temp_max=None,
+        temp_mean=None,
+        wind_speed=None,
+        humidity_mean=None,
+        humidity_min=None,
+        humidity_max=None,
+        radiation_s=None,
+        sunshine_hours=None,
+    ):
         """
+        Calculate the evapotranspiration for a given day or day of year.
+
         Given a day number (integer type from 1-366) returns a **StationDay*** instance for
         that day. Logs the day in *days* attribute of the **Station()** class.
 
@@ -119,14 +118,11 @@ class Station:
          for this date (based on solar declination, sun-distance and daylight hours)
          raises ValueError exception.
         """
-
         if type(day_number) is str:
             try:
                 dt1 = dt.datetime.strptime(day_number, date_template)
             except ValueError as e:
-                raise ValueError(
-                    "Date must be in YYYY-MM-DD format (ex: 2020-09-28)"
-                ) from e
+                raise ValueError("Date must be in YYYY-MM-DD format (ex: 2020-09-28)") from e
 
             dt0 = dt.datetime(dt1.year, 1, 1)
             dates_delta = dt1 - dt0
@@ -144,15 +140,15 @@ class Station:
         day.temp_min = temp_min
         day.temp_max = temp_max
         day.temp_mean = temp_mean
-        day.humidity_min=humidity_min
-        day.humidity_max=humidity_max
+        day.humidity_min = humidity_min
+        day.humidity_max = humidity_max
         day.humidity_mean = humidity_mean
         day.wind_speed = wind_speed
 
         if radiation_s:
             if (
                 CHECK_RADIATION_RANGE
-                and radiation_s <= day.R_so()
+                and radiation_s <= day.clear_sky_rad()
                 or not CHECK_RADIATION_RANGE
             ):
                 day.radiation_s = radiation_s
@@ -196,6 +192,8 @@ class DayEntry:
 
     def __init__(self, day_number, station):
         """
+        Instantiate a DayEntry-object.
+
         *day_number* and *station* are two required arguments passed to
         instantiate the class. Day number must be between 1-366. It represents a
         single day in a year, *1* meaning January 1st, and 365 (or 366) being
@@ -226,10 +224,8 @@ class DayEntry:
         - sunshine_hours
         -
         """
-
         self.day_number = day_number
         self.station = station
-
         self.temp_min = None
         self.temp_max = None
         self.temp_mean = None
@@ -242,13 +238,15 @@ class DayEntry:
         self.temp_dry = None
         self.temp_wet = None
         self.climate = station.climate
-        self.stephan_boltzmann_constant = 4.903 * (10 ** -9)
+        self.stephan_boltzmann_constant = 4.903 * (10**-9)
         self.vapour_pressure = None
         self.sunshine_hours = None
+        self.specific_heat = 1.013 * 10 ** (-3)
+        self.latent_heat_of_vaporization = 2.45
 
     def wind_speed_2m(self):
         """
-        Returns wind speed at 2m height.
+        Calculate the wind speed at 2m height.
 
         If this information is already logged, returns as is. If anemometer of
         the Station is located higher and wind speed information is available it
@@ -257,17 +255,18 @@ class DayEntry:
 
         If wind speed was not logged for this date, and if climate is known
         tries to rely on Climate data to estimate average wind speed
+
+        if wind speed at 2m height is given, return it
+        if wind speed at height different than 2m is given, calculate wind
+        speed at 2m
         """
+        if self.wind_speed:
+            if self.station.anemometer_height == 2:
+                return self.wind_speed
 
-        # if wind speed at 2m height is given, return it
-        if self.wind_speed and (self.station.anemometer_height == 2):
-            return self.wind_speed
-
-        # if wind speed at height different than 2m is given, calculate wind
-        # speed at 2m
-        if self.wind_speed and self.station.anemometer_height != 2:
-            return round(self.wind_speed * (4.87 /
-                                            math.log(67.8 * self.station.anemometer_height - 5.42)), 1)
+            return round(
+                self.wind_speed * (4.87 / math.log(67.8 * self.station.anemometer_height - 5.42)), 1
+            )
 
         # if we reach this far no wind information is available to work with. we
         # consult if station has any climatic data, in which case we try to
@@ -279,8 +278,10 @@ class DayEntry:
 
     def dew_point(self):
         """
-        If *temp_dew* attribute is logged returns as is. If this data was not
-        logged, but *temp_min* data is available tries to estimate *temp_dew*
+        Calculate dew point temperature.
+
+        If *temp_dew* attribute is logged returns as is.
+        If this data was not logged, but *temp_min* data is available tries to estimate *temp_dew*
         based on Station's Climate. If either is not possible returns *None*.
         """
         if self.temp_dew:
@@ -288,54 +289,44 @@ class DayEntry:
 
         if self.temp_min and self.climate:
             return self.temp_min - self.climate.dew_point_difference
+        return False
 
     def atmospheric_pressure(self):
-        """
-        Calculates atmospheric pressure *in kPa* based on station's altitude. (Eq. 7)
-        """
+        """Calculate atmospheric pressure *in kPa* based on station's altitude (Eq. 7)."""
         return self.station.atmospheric_pressure()
-
-    def latent_heat_of_vaporization(self):
-        """
-        constant *2.45*
-        """
-        return 2.45
-
-    def specific_heat(self):
-        """
-       constant: 1.013*10**(-3)
-        """
-        return 1.013 * 10 ** (-3)
 
     def psychrometric_constant(self):
         """
-        Calculates psychrometric constant based on Station's altitude (and
-        atmospheric pressure). (Eq. 8)
+        Calculate psychrometric constant.
+
+        The computation is based on Station's altitude (and atmospheric pressure, Eq. 8).
         """
         return round(0.665 * 10 ** (-3) * self.atmospheric_pressure(), 6)
 
-    def Tmean(self):
+    def interpolate_temp_mean(self):
         """
+        Interpolate the mean temperature from max and min.
+
         If *temp_mean* is logged returns is as is. If *temp_min* and *temp_max*
-        are available computes *Tmean* based on these data. If none are
+        are available computes *temp_mean* based on these data. If none are
         available returns *None*. (Eq. 9)
         """
         if self.temp_mean:
             return self.temp_mean
 
         if self.temp_max and self.temp_min:
-            return ((self.temp_max + self.temp_min) / 2)
+            return (self.temp_max + self.temp_min) / 2
 
         return None
 
-    def saturation_vapour_pressure(self, T):
-        """
-        Calculates saturation vapour pressure for a given temperature. (Eq. 11)
-        """
-        return round((0.6108 * (2.7183 ** (17.27 * T / (T + 237.3)))), 3)
+    def saturation_vapour_pressure(self, temp):
+        """Calculate saturation vapour pressure for a given temperature (Eq. 11)."""
+        return round((0.6108 * (2.7183 ** (17.27 * temp / (temp + 237.3)))), 3)
 
     def mean_saturation_vapour_pressure(self):
         """
+        Calculate mean saturation vapour pressure.
+
         Given *temp_max* and *temp_min* calculates mean saturation vapour pressure. (Eq. 12)
         """
         if self.temp_max and self.temp_min:
@@ -346,18 +337,19 @@ class DayEntry:
         if self.temp_mean:
             return self.saturation_vapour_pressure(self.temp_mean)
 
-    def slope_of_saturation_vapour_pressure(self, T):
+    def slope_of_saturation_vapour_pressure(self, temp):
         """
-        Calculates slope of the saturation vapour pressure curve for a given
-        temperature. It's the required information to calculate ETo. (Eq. 13)
+        Calculate slope of the saturation vapour pressure curve for a given temperature.
+
+        It's the required information to calculate ETo. (Eq. 13)
         """
-        return round((4098 * (0.6108 * 2.7183 ** (17.27 * T / (T + 237.3))))
-                     / ((T + 237.3) ** 2), 6)
+        return round(
+            (4098 * (0.6108 * 2.7183 ** (17.27 * temp / (temp + 237.3)))) / ((temp + 237.3) ** 2), 6
+        )
 
     def actual_vapour_pressure(self):
         """
-        Attepmts to calculate vapour pressure based on several available weather
-        data.
+        Attempt to calculate vapour pressure based on several available weather data.
 
         If *temp_dry* and *temp_wet* data are logged (psychrometric data) uses
         (Eq. 15) to calculate actual vapour pressure. If only *temp_dew*
@@ -373,14 +365,14 @@ class DayEntry:
         if self.temp_dry and self.temp_wet:
             vp_wet = self.saturation_vapour_pressure(self.temp_wet)
             psychrometric_constant = self.psychrometric_constant()
-            return round(vp_wet - psychrometric_constant *
-                         (self.temp_dry - self.temp_wet), 3)
+            return round(vp_wet - psychrometric_constant * (self.temp_dry - self.temp_wet), 3)
 
         if self.humidity_max and self.humidity_min and self.temp_max and self.temp_min:
             vp_min = self.saturation_vapour_pressure(self.temp_min)
             vp_max = self.saturation_vapour_pressure(self.temp_max)
-            return round((vp_min * (self.humidity_max / 100) +
-                          vp_max * (self.humidity_min / 100)) / 2, 3)
+            return round(
+                (vp_min * (self.humidity_max / 100) + vp_max * (self.humidity_min / 100)) / 2, 3
+            )
 
         if self.humidity_max and self.temp_min:
             vp_min = self.saturation_vapour_pressure(self.temp_min)
@@ -395,6 +387,7 @@ class DayEntry:
             return round(self.saturation_vapour_pressure(self.dew_point()), 3)
 
     def vapour_pressure_deficit(self):
+        """Calculate vapour pressure deficit."""
         if self.temp_min and self.temp_max:
             vp_min = self.saturation_vapour_pressure(self.temp_min)
             vp_max = self.saturation_vapour_pressure(self.temp_max)
@@ -402,70 +395,65 @@ class DayEntry:
             return round(((vp_min + vp_max) / 2) - actual_vp, 3)
 
     def relative_sun_distance(self):
-        """
-        Eq. 23
-        """
+        """Eq. 23."""
         return round(1 + 0.033 * math.cos((2 * math.pi / 365) * self.day_number), 3)
 
     def solar_declination(self):
-        """
-        Eq. 24
-        """
+        """Eq. 24."""
         return round(0.409 * math.sin((2 * math.pi / 365) * self.day_number - 1.39), 3)
 
-    def X(self):
-        """
-        Eq. 27
-        """
-        x = (1 - math.tan(self.station.latitutde_radians) *
-             math.tan(self.solar_declination()))
+    def x_distance_from_sun(self):
+        """Eq. 27."""
+        x = 1 - math.tan(self.station.latitude_rad) * math.tan(self.solar_declination())
         if x <= 0:
             x = 0.00001
         return x
 
     def sunset_hour_angle(self):
-        """
-        Eq. 25
-        """
-
-        return round(math.acos(-1 * math.tan(self.station.latitude_rad) *
-                               math.tan(self.solar_declination())), 3)
-
-    def R_a(self):
-        """
-        Extraterrestrial radiation for daily periods.( Eq. 21 ).
-        """
-
+        """Eq. 25."""
         return round(
-            24 * 60 / math.pi * 0.0820 * self.relative_sun_distance() *
-            (
-                (
-                self.sunset_hour_angle() * math.sin(self.station.latitude_rad) *
-                math.sin(self.solar_declination())
-                ) +
-                (
-                 math.cos(self.station.latitude_rad) *
-                 math.cos(self.solar_declination()) *
-                 math.sin(self.sunset_hour_angle())
-                )
-             ),
-            1)
+            math.acos(
+                -1 * math.tan(self.station.latitude_rad) * math.tan(self.solar_declination())
+            ),
+            3,
+        )
 
-    def R_a_in_mm(self):
-        """
-        Same as R_a(), but returns the result in mm-equivalents
-        """
-        return round(self.R_a() * 0.408, 1)
+    def r_a(self):
+        """Extraterrestrial radiation for daily periods ( Eq. 21 )."""
+        return round(
+            24
+            * 60
+            / math.pi
+            * 0.0820
+            * self.relative_sun_distance()
+            * (
+                (
+                    self.sunset_hour_angle()
+                    * math.sin(self.station.latitude_rad)
+                    * math.sin(self.solar_declination())
+                )
+                + (
+                    math.cos(self.station.latitude_rad)
+                    * math.cos(self.solar_declination())
+                    * math.sin(self.sunset_hour_angle())
+                )
+            ),
+            1,
+        )
+
+    def ra_to_mm(self):
+        """Transform as r_a to mm-equivalents."""
+        return round(self.r_a() * 0.408, 1)
 
     def daylight_hours(self):
-        """
-        Eq. 34
-        """
+        """Calculate daylight hours from Eq. 34."""
         return round((24 / math.pi) * self.sunset_hour_angle(), 1)
 
     # Rs
     def solar_radiation(self):
         """
+        Calculate solar radiation.
+
         If *radiation_s* is logged, returns the value as is. If *sunshine_hours*
         attribute of the day class is set returns solar radiation amount in mJ/m2/day.
         To convert this number to W/m2 multiply multiply it by 11.57 or divide by
@@ -483,42 +471,43 @@ class DayEntry:
         If climate is not known it assumes **n=N**, meaning daily sunshine hours
         is the same as daylight hours for the given day and location.
         """
-
         if self.radiation_s:
             # We need to make sure that solar radiation if set, is not
             # larger than clear-sky solar radiation
-            if CHECK_RADIATION_RANGE and (self.radiation_s > self.R_so()):
-                raise ValueError(
-                    "Solar radiation out ot range. Rso=" + str(self.R_so()))
+            if CHECK_RADIATION_RANGE and (self.radiation_s > self.clear_sky_rad()):
+                raise ValueError(f"Solar radiation out ot range. Rso={str(self.clear_sky_rad())}")
             return self.radiation_s
 
         n = self.sunshine_hours
-        if n == None:
+        if n is None:
             # if we are in island location we refer to equation 51 in UAN-FAO
             # paper 56
-            if (self.station.climate and self.station.climate.island_location
-                    and self.station.altitude < 100):
-                Ra = self.R_a()
-                return round((0.7 * Ra) - 4, 1)
+            if (
+                self.station.climate
+                and self.station.climate.island_location
+                and self.station.altitude < 100
+            ):
+                ra = self.r_a()
+                return round((0.7 * ra) - 4, 1)
 
             if self.station.climate and self.temp_min and self.temp_max:
                 # We assume caller has only temperature informaiton, and no
                 # information on overcast conditions. So we resort to Hargreaves
                 # and Samani's radiation formula:
                 climate = self.station.climate
-                Ra = self.R_a()
+                ra = self.r_a()
                 krs = 0.16
                 if climate.coastal_location:
                     krs = 0.19
                 elif climate.interior_location:
                     krs = 0.16
 
-                return round(krs * math.sqrt(self.temp_max - self.temp_min) * Ra, 1)
+                return round(krs * math.sqrt(self.temp_max - self.temp_min) * ra, 1)
 
             else:
                 n = self.daylight_hours()
 
-        if n and not is_number(n):
+        if n and not isinstance(n, (int, float)):
             raise TypeError("'n' must be a number")
 
         if n < 0:
@@ -530,13 +519,15 @@ class DayEntry:
 
         a_s = 0.25
         b_s = 0.50
-        N = self.daylight_hours()  # this is the maximum possible sunshine duration
-        Ra = self.R_a()
+        max_daylight_hours = self.daylight_hours()  # this is the maximum possible sunshine duration
+        ra = self.r_a()
 
-        return round((a_s + b_s * n / N) * Ra, 1)
+        return round((a_s + b_s * n / max_daylight_hours) * ra, 1)
 
     def solar_radiation_in_mm(self):
         """
+        Convert solar radiation to mm.
+
         Alias to *solar_radiation(n)* but converts the output to mm equivalent,
         rounded to 1 decimal.
         """
@@ -544,146 +535,147 @@ class DayEntry:
         return round(rs * 0.408, 1)
 
     # clear-skype solar radiation
-    def R_so(self):
+    def clear_sky_rad(self):
         """
         Calculate clear sky radiation when n=N.
 
         Uses (Eq. 36) for elevations below 100m. Above 100m uses (Eq. 37).
         """
         if self.station.altitude < 100:
-            return round((0.25 + 0.50) * self.R_a(), 1)
+            return round((0.25 + 0.50) * self.r_a(), 1)
 
-        return round((0.75 + (2 * 10**(-5)) * self.station.altitude) * self.R_a(), 1)
+        return round((0.75 + (2 * 10 ** (-5)) * self.station.altitude) * self.r_a(), 1)
 
-    def R_ns(self):
+    def net_solar_rad(self):
         """
-        Net solar or net shortwave radiation. Uses Crop's albedo in calculations. (Eq. 38).
-        Return radiation in MJ/m2/day
+        Calculate net solar or net shortwave radiation.
 
+        Uses Crop's albedo in calculations. (Eq. 38).
+        Return radiation in MJ/m2/day
         """
         ref_crop = self.station.ref_crop
-
         return round((1 - ref_crop.albedo) * self.solar_radiation(), 1)
 
-    def R_nl(self):
-        """
-        Net longwave radiation. (Eq. 39)
-        """
-
+    def net_longwave_rad(self):
+        """Calculate net longwave radiation (Eq. 39)."""
         if not (self.temp_max and self.temp_min):
-            raise Exception(
-                "Net longwave radiation cannot be calculated without min/max temperature")
+            raise AttributeError(
+                "Net longwave radiation cannot be calculated without min/max temperature"
+            )
 
-        TmaxK = self.temp_max + 273.16
-        TminK = self.temp_min + 273.16
+        temp_max_k = self.temp_max + 273.16
+        temp_min_k = self.temp_min + 273.16
         ea = self.actual_vapour_pressure()
         rs = self.solar_radiation()
-        rso = self.R_so()
+        rso = self.clear_sky_rad()
 
         sb_constant = self.stephan_boltzmann_constant
-        return round(sb_constant * ((TmaxK ** 4 + TminK ** 4) / 2) *
-                     (0.34 - 0.14 * math.sqrt(ea)) *
-                     (1.35 * (rs / rso) - 0.35), 1)
+        return round(
+            sb_constant
+            * ((temp_max_k**4 + temp_min_k**4) / 2)
+            * (0.34 - 0.14 * math.sqrt(ea))
+            * (1.35 * (rs / rso) - 0.35),
+            1,
+        )
 
     def net_radiation(self):
-        """
-        Net Radiation. (Eq. 40)
-        """
-        ns = self.R_ns()
+        """Calculate net radiation (Eq. 40)."""
+        ns = self.net_solar_rad()
 
         try:
-            nl = self.R_nl()
-        except Exception as e:
-            raise(str(e))
+            nl = self.net_longwave_rad()
+        except BaseException as e:
+            raise (str(e)) from e
 
-        if (not ns is None) and (not nl is None):
+        if (ns is not None) and (nl is not None):
             return round(ns - nl, 1)
 
-    def net_radition_in_mm(self):
-        """
-        Same as *net_radiation()*, except returns results in mm-equivalents
-        """
-        net_radition = self.net_radiation()
-        if net_radition:
-            return round(net_radition * 0.408, 1)
+    def net_radiation_to_mm(self):
+        """Convert *net_radiation()* to mm."""
+        if net_radiation := self.net_radiation():
+            return round(net_radiation * 0.408, 1)
 
-    def RH(self, T):
-
-        if not is_number(T):
+    def relative_humidity(self, T):
+        """Calculate relative humidity of air given temperature using vapour pressure."""
+        if not isinstance(T, (int, float)):
             raise TypeError("Number is expected")
+        return round(100 * (self.actual_vapour_pressure() / self.saturation_vapour_pressure(T)), 3)
 
+    def relative_humidity_mean(self):
         """
-        Calculates relative humidity of the air for certain temperature using vapour pressure
-        """
+        Calculate the mean of relative humidity.
 
-        return round(100 * (self.actual_vapour_pressure() /
-                            self.saturation_vapour_pressure(T)), 3)
-
-    def RH_mean(self):
-        """
-        If possible returns mean relative humidity for the day. If humidity_mean was logged in the station
-        returns it as is.
-        If min/max humidity values were logged at the station, computes
-        the mean of the two values
+        If possible returns mean relative humidity for the day.
+        If humidity_mean was logged in the station returns it as is.
+        If min/max humidity values were logged at the station, computes the mean of the two values
         If none was logged, but min/max temperature values were logged it attempts to calculate
         relative humidity through saturation vapour pressure:
         """
-        if self.humidity_mean != None:
+        if self.humidity_mean is not None:
             return self.humidity_mean
 
-        if (self.humidity_min != None) and (self.humidity_max != None):
-            return round( ( self.humidity_max + self.humidity_min ) / 2, 0 )
+        if (self.humidity_min is not None) and (self.humidity_max is not None):
+            return round((self.humidity_max + self.humidity_min) / 2, 0)
 
-        if ( self.temp_min != None ) and ( self.temp_max != None ):
-            return int(round(( self.RH(self.temp_min) + self.RH(self.temp_max) ) / 2, 0))
+        if (self.temp_min is not None) and (self.temp_max is not None):
+            return int(
+                round(
+                    (self.relative_humidity(self.temp_min) + self.relative_humidity(self.temp_max))
+                    / 2,
+                    0,
+                )
+            )
 
         return None
 
-
     def soil_heat_flux(self):
-        """
-        Soil heat flux. Returns 0.00 (daily coefficient)
+        """Calculate soil heat flux.
+
+        Returns 0.00 (daily coefficient)
         """
         return 0.00
 
     def eto_hargreaves(self):
         """
-        ETo estimating using Hargreaves euqation. If wind and humidty information is
-        available, or can be estimated thsi equation is not recommended. ( Eq. 52 )
+        Eto estimating using Hargreaves equation.
+
+        If wind and humidty information is available, or can be estimated by this equation
+        is not recommended. ( Eq. 52 )
         """
-        Tmean = (self.temp_max + self.temp_min) / 2
-        return round(0.0023 * (Tmean + 17.8) *
-                     (self.temp_max - self.temp_min) ** 0.5 * self.R_a(), 2)
+        temp_mean = self.interpolate_temp_mean()
+        return round(
+            0.0023
+            * (temp_mean + 17.8)
+            * (self.temp_max - self.temp_min) ** 0.5
+            * self.r_a(),
+            2,
+        )
 
     def eto(self):
-        """
-        Eq. 6
-        """
-
+        """Calculate evapotranspiration from Eq. 6."""
         # if we cannot get wind speed data we revert to Hargreaves formula.
         # Which is not ideal! This can happen only if user removed default 'climate'
         # reference
         if not self.wind_speed_2m():
             return self.eto_hargreaves()
 
-        if self.Tmean() == None:
-            raise Exception(
-                "Cannot calculate eto(): temp_mean (mean temperature) is missing")
+        if self.interpolate_temp_mean() is None:
+            raise AttributeError("Cannot calculate eto(): temp_mean (mean temperature) is missing")
 
         try:
             net_radiation = self.net_radiation()
         except Exception as e:
-            raise(str(e))
+            raise (str(e)) from e
 
-        Tmean = self.Tmean()
-        slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
-        G = self.soil_heat_flux()
+        temp_mean = self.interpolate_temp_mean()
+        slope_of_vp = self.slope_of_saturation_vapour_pressure(temp_mean)
+        ground_heat_flux = self.soil_heat_flux()
         u2m = self.wind_speed_2m()
         eto_nominator = (
-                        ( 0.408 * slope_of_vp * (net_radiation - G) ) +
-                         self.psychrometric_constant() * (900 / (Tmean + 273)) * u2m *
-                         self.vapour_pressure_deficit()
-                         )
+            0.408 * slope_of_vp * (net_radiation - ground_heat_flux)
+        ) + self.psychrometric_constant() * (
+            900 / (temp_mean + 273)
+        ) * u2m * self.vapour_pressure_deficit()
 
         eto_denominator = slope_of_vp + self.psychrometric_constant() * (1 + 0.34 * u2m)
         return round(eto_nominator / eto_denominator, 2)
@@ -691,8 +683,9 @@ class DayEntry:
 
 class Climate:
     """
-    Represents a default climate according to *UN-FAO Paper 56*. If
-    module has to make any assumptions regarding the climate it consults
+    Represents a default climate according to *UN-FAO Paper 56*.
+
+    If module has to make any assumptions regarding the climate it consults
     this class for any clues. If you wish to not use any assumptions and
     rely soleley on logged station data (if such is available) you may set
     Station's *climate* attribute to *None*.
@@ -710,6 +703,8 @@ class Climate:
 
     def __init__(self):
         """
+        Instantiate Climate-class object.
+
         Accepts no arguments. Default initialization is as follows:
 
             - interior_location
@@ -735,48 +730,36 @@ class Climate:
         self.k_rs = 0.16
 
     def light_winds(self):
-        """
-        Sets *average_wind_speed* to 0.5m/s
-        """
+        """Set *average_wind_speed* to 0.5m/s."""
         self.average_wind_speed = 0.5
         return self
 
     def moderate_winds(self):
-        """
-        Sets *average_wind_speed* to 2.0m/s
-        """
+        """Set *average_wind_speed* to 2.0m/s."""
         self.average_wind_speed = 2
         return self
 
     def strong_winds(self):
-        """
-        Sets average_wind_speed to 4m/s
-        """
+        """Set average_wind_speed to 4m/s."""
         self.average_wind_speed = 4
         return self
 
     def arid(self):
-        """
-        Sets *arid_climate*, sets *dew_point_difference* to 2
-        """
+        """Set *arid_climate* and *dew_point_difference* to 2."""
         self.arid_climate = True
         self.humid_climate = False
         self.dew_point_difference = 2
         return self
 
     def humid(self):
-        """
-        Sets *humid_climate*, *dew_point_difference* to 0
-        """
+        """Set *humid_climate* and *dew_point_difference* to 0."""
         self.arid_climate = False
         self.humid_climate = True
         self.dew_point_difference = 0
         return self
 
     def interior(self):
-        """
-        Sets *interior_location*, *k_rs* coefficient to *0.16*
-        """
+        """Set *interior_location*, *k_rs* coefficient to *0.16*."""
         self.interior_location = True
         self.coastal_location = False
         self.island_location = False
@@ -784,9 +767,7 @@ class Climate:
         return self
 
     def coastal(self):
-        """
-        Sets *coastal_location*, *k_rs* to *0.19*
-        """
+        """Set *coastal_location*, *k_rs* to *0.19*."""
         self.interior_location = False
         self.coastal_location = True
         self.island_location = False
@@ -794,7 +775,7 @@ class Climate:
         return self
 
     def island(self):
-        """ Sets *island_location*. Sets *k_rs* to 0.19 """
+        """Set *island_location* and *k_rs* to 0.19."""
         self.interior_location = False
         self.coastal_location = False
         self.island_location = True
@@ -815,7 +796,8 @@ class Climate:
         return self
     """
 
-    def describe(self):
+    def __str__(self):
+        """Get string representation of object."""
         location = "interior" if self.interior_location else "coastal"
         if self.arid_climate:
             humidity = "arid, or semi-arid region"
@@ -831,7 +813,7 @@ class Climate:
 
 
 class Crop:
-    """ Represents reference crop as assumed by Penman-Monteith equation."""
+    """Represents reference crop as assumed by Penman-Monteith equation."""
 
     def __init__(self, resistance_a=208, albedo=0.23, height=0.12):
         """

@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         station = pm.Station(41.42, 109)
         day = station.day_entry(238, temp_mean=25.00)
         self.assertTrue(day.temp_mean != None, "temp_mean was set")
-        self.assertEqual(day.temp_mean, day.Tmean())
+        self.assertEqual(day.temp_mean, day.interpolate_temp_mean())
 
         # following code should raise an exception:
         try:

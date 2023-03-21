@@ -1,10 +1,10 @@
 """
 Penman-Monteith Equation implementation in Python.
 
-Full implementation of Penman-Monteith ETo equation based on UAN-FAO 
+Full implementation of Penman-Monteith ETo equation based on UAN-FAO
 [Irrigation and Drainage Paper 56](http://www.fao.org/3/X0490E/x0490e00.htm)
 
-Penman-Monteith equation is used to calculate reference crop evapotranspiration (ETo) 
+Penman-Monteith equation is used to calculate reference crop evapotranspiration (ETo)
 for a given location using available climate data. This method provides many ways of estimating
 missing climate data using minimal data.
 
@@ -97,7 +97,7 @@ class Station:
         self.anemometer_height = anemometer_height
         self.climate = Climate()
         self.ref_crop = Crop()
-        
+
     def day_entry(self, day_number, date_template="%Y-%m-%d",
                 temp_min=None,
                 temp_max=None,
@@ -108,13 +108,13 @@ class Station:
                 sunshine_hours=None
                 ):
         """
-        Given a day number (integer type from 1-366) returns a **StationDay*** instance for 
+        Given a day number (integer type from 1-366) returns a **StationDay*** instance for
         that day. Logs the day in *days* attribute of the **Station()** class.
 
         If it receives a string it expects it to be in "yyyy-mm-dd" format, in which case
         it parses the string into **datetime** and calculates day number
 
-        If your date format is different than assumed, you can adjust *date_template* 
+        If your date format is different than assumed, you can adjust *date_template*
         as the second parameter. For example, following all three lines are identical
 
             day = station.day_entry(229)
@@ -266,12 +266,12 @@ class TimeEntry:
     """
     Represents a single day retrieved from the Station.
 
-    This class is usually not instantiated directly. It's instantniated by the 
+    This class is usually not instantiated directly. It's instantniated by the
     **Station()**'s day_entry() method, passing all reuqired state data.
 
-    Since bulk of Penman-Moneith is concerned with a daily ETo **StationDay** is 
-    heart of the module. Penman-Monteith equatoin is implemented within the 
-    methods of **StationDay**. 
+    Since bulk of Penman-Moneith is concerned with a daily ETo **StationDay** is
+    heart of the module. Penman-Monteith equatoin is implemented within the
+    methods of **StationDay**.
 
     All meteorological data are stored within this class instance.
     """
@@ -336,7 +336,7 @@ class TimeEntry:
 
     def wind_speed_2m(self):
         """
-        Returns wind speed at 2m height. 
+        Returns wind speed at 2m height.
 
         If this information is already logged, returns as is. If anemometer of
         the Station is located higher and wind speed information is available it
@@ -395,7 +395,7 @@ class TimeEntry:
 
     def specific_heat(self):
         """
-       constant: 1.013*10**(-3) 
+       constant: 1.013*10**(-3)
         """
         return 1.013 * 10 ** (-3)
 
@@ -562,7 +562,7 @@ class TimeEntry:
 
     def solar_radiation_in_mm(self):
         """
-        Alias to *solar_radiation(n)* but converts the output to mm equivalent, 
+        Alias to *solar_radiation(n)* but converts the output to mm equivalent,
         rounded to 1 decimal.
         """
         rs = self.solar_radiation()
@@ -582,7 +582,7 @@ class TimeEntry:
 
     def R_ns(self):
         """
-        Net solar or net shortwave radiation. Uses Crop's albedo in calculations. (Eq. 38). 
+        Net solar or net shortwave radiation. Uses Crop's albedo in calculations. (Eq. 38).
         Return radiation in MJ/m2/day
 
         """
@@ -645,10 +645,10 @@ class TimeEntry:
                             self.saturation_vapour_pressure(T)), 3)
 
     def RH_mean(self):
-        
+
         if self.humidity_mean != None:
             return self.humidity_mean
-        
+
         if self.temp_min and self.temp_max:
             return int(round(( self.RH(self.temp_min) + self.RH(self.temp_max) ) / 2, 0))
 
@@ -666,7 +666,7 @@ class TimeEntry:
 
     def eto_hargreaves(self):
         """
-        ETo estimating using Hargreaves euqation. If wind and humidty information is 
+        ETo estimating using Hargreaves euqation. If wind and humidty information is
         available, or can be estimated thsi equation is not recommended. ( Eq. 52 )
         """
         Tmean = (self.temp_max + self.temp_min) / 2
@@ -884,8 +884,8 @@ class HourEntry(TimeEntry):
         return 37 # return the official approximation
 
 class Climate:
-    """ 
-    Represents a default climate according to *UN-FAO Paper 56*. If 
+    """
+    Represents a default climate according to *UN-FAO Paper 56*. If
     module has to make any assumptions regarding the climate it consults
     this class for any clues. If you wish to not use any assumptions and
     rely soleley on logged station data (if such is available) you may set
@@ -1023,9 +1023,9 @@ class Climate:
             humidity = "humid, or sub-humid region"
 
         return f"""
-Climate can be described as located in {location} area, {humidity}. 
-Average wind speeds are estimated at {self.average_wind_speed}. 
-Dew point temperature is usually runs {self.dew_point_difference}C lower than 
+Climate can be described as located in {location} area, {humidity}.
+Average wind speeds are estimated at {self.average_wind_speed}.
+Dew point temperature is usually runs {self.dew_point_difference}C lower than
 day's minimal observed temperature"""
 
 
@@ -1046,7 +1046,7 @@ class Crop:
 
 class StationDay(DayEntry):
     """
-    Left here for backwards-compatability with earlier versions of 
+    Left here for backwards-compatability with earlier versions of
     the library
     """
 

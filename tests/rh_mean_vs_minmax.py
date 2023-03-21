@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         )
 
     def testRs(self):
-        self.assertEqual(self.day180.R_a(), 41.7, "Ra is 41.7")
+        self.assertEqual(self.day180.r_a(), 41.7, "Ra is 41.7")
 
 
 if __name__ == "__main__":

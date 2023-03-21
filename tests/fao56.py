@@ -53,11 +53,11 @@ class Test(unittest.TestCase):
 
     def test_specific_heat(self):
         day = self.station.day_entry(130)
-        self.assertEqual(day.specific_heat(), 1.013 * 10 ** (-3))
+        self.assertEqual(day.specific_heat, 1.013 * 10 ** (-3))
 
     def test_latent_heat_of_vaporization(self):
         day = self.station.day_entry(130)
-        self.assertEqual(day.latent_heat_of_vaporization(), 2.45)
+        self.assertEqual(day.latent_heat_of_vaporization, 2.45)
 
     def test_mean_saturation_vp(self):
         day_130 = self.day_130
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
         day = self.station.day_entry(130)
         day.temp_dew = 19.5
         self.assertEqual(
-            round(day.RH(35), 2),
+            round(day.relative_humidity(35), 2),
             40.32,
             "We can calculate relative humidity for a given T if dew point is known",
         )
@@ -202,11 +202,11 @@ class Test(unittest.TestCase):
         self.assertEqual(sunset_angle, 1.527)
 
     def test_r_a(self):
-        r_a = Station(-20.0, 1200).day_entry(246).R_a()
+        r_a = Station(-20.0, 1200).day_entry(246).r_a()
         self.assertEqual(r_a, 32.2)
 
     def test_r_a_in_mm(self):
-        r_a = Station(-20.0, 1200).day_entry(246).R_a_in_mm()
+        r_a = Station(-20.0, 1200).day_entry(246).ra_to_mm()
         self.assertEqual(r_a, 13.10)
 
     def test_daylight_hours(self):
@@ -225,13 +225,13 @@ class Test(unittest.TestCase):
         solar_radiation = day.solar_radiation()
         self.assertEqual(solar_radiation, 14.4)
 
-        clear_sky_radiation = day.R_so()
+        clear_sky_radiation = day.clear_sky_rad()
         self.assertEqual(clear_sky_radiation, 18.8)
 
     def test_net_shortwave_radiation(self):
         day = Station(-22.90, 1200).day_entry(135)
         day.sunshine_hours = 7.1
-        r_ns = day.R_ns()
+        r_ns = day.net_solar_rad()
         self.assertEqual(r_ns, 11.1)
 
     def test_net_longwave_radiation(self):
@@ -246,7 +246,7 @@ class Test(unittest.TestCase):
 
         day.sunshine_hours = 7.1
 
-        r_nl = day.R_nl()
+        r_nl = day.net_longwave_rad()
         self.assertEqual(r_nl, 3.3)
 
     def test_net_radiation(self):
@@ -274,7 +274,7 @@ class Test(unittest.TestCase):
         day.temp_max = 26.6
         day.temp_min = 14.8
 
-        ra = day.R_a()
+        ra = day.r_a()
         self.assertEqual(ra, 40.6)
 
         solar_radiation = day.solar_radiation()
@@ -292,7 +292,7 @@ class Test(unittest.TestCase):
 
         self.assertEqual(Station(13.73, 2).latitude_rad, 0.24)
 
-        ra = day.R_a()
+        ra = day.r_a()
         self.assertEqual(ra, 38.0)
         net_radiation = day.net_radiation()
 
