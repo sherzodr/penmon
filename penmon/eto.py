@@ -13,6 +13,7 @@ Homepage of the project: https://github.com/sherzodr/penmon
 """
 
 import datetime as dt
+from numpy import nan
 import math
 
 CHECK_RADIATION_RANGE = True
@@ -152,6 +153,8 @@ class Station:
                 or not CHECK_RADIATION_RANGE
             ):
                 day.radiation_s = radiation_s
+            elif radiation_s is nan:
+                pass
             else:
                 raise ValueError("Radiation out of range")
         if sunshine_hours:
