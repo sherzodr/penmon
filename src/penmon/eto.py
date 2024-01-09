@@ -14,6 +14,7 @@ Homepage of the project: https://github.com/sherzodr/penmon
 
 import math
 import datetime as dt
+import pandas as pd
 
 CHECK_RADIATION_RANGE = True
 CHECK_SUNSHINE_HOURS_RANGE = True
@@ -153,7 +154,7 @@ class Station:
                 if radiation_s <= day.R_so():
                     day.radiation_s = radiation_s
                 else:
-                    raise ValueError("Raditaion out of range")
+                    raise ValueError(f"Raditaion {str(radiation_s)} must be smaller than {str(day.R_so())}")
             else:
                 day.radiation_s = radiation_s
 
@@ -181,6 +182,28 @@ class Station:
         Describes the station and all its assumptions in human-friendly text
         """
         return self
+    
+    def import_data(self, dataframe: pd.DataFrame):
+        """
+        Import data from a pandas DataFrame and populate the Station's days.
+
+        Parameters:
+        - dataframe: pandas DataFrame with columns representing necessary data.
+        """
+        for index, row in dataframe.iterrows():
+            day_number = row.get('day_number')  # Replace with the actual column name
+            date_template = row.get('date_template', "%Y-%m-%d")  # Replace with the actual column name
+
+            self.day_entry(day_number=day_number, date_template=date_template,
+                           temp_min=row.get('temp_min'),
+                           temp_max=row.get('temp_max'),
+                           temp_mean=row.get('temp_mean'),
+                           wind_speed=row.get('wind_speed'),
+                           humidity_mean=row.get('humidity_mean'),
+                           humidity_min=row.get('humidity_min'),
+                           humidity_max=row.get('humidity_max'),
+                           radiation_s=row.get('radiation_s'),
+                           sunshine_hours=row.get('sunshine_hours'))
 
 
 class DayEntry:
@@ -594,10 +617,7 @@ class DayEntry:
         """
         ns = self.R_ns()
 
-        try:
-            nl = self.R_nl()
-        except Exception as e:
-            raise(str(e))
+        nl = self.R_nl()
 
         if (not ns is None) and (not nl is None):
             return round(ns - nl, 1)
@@ -673,10 +693,7 @@ class DayEntry:
             raise Exception(
                 "Cannot calculate eto(): temp_mean (mean temperature) is missing")
 
-        try:
-            net_radiation = self.net_radiation()
-        except Exception as e:
-            raise(str(e))
+        net_radiation = self.net_radiation()
 
         Tmean = self.Tmean()
         slope_of_vp = self.slope_of_saturation_vapour_pressure(Tmean)
