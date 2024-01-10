@@ -21,9 +21,27 @@ Penman-Monteith ETo Equation.
     		temp_max = 25.6, 
     		wind_speed = 2.5,
     		humidity_mean = 65,
-    		radiation_s =2 5.6
+    		radiation_s =25.6
     		)
     print("ETo for this day is", day.eto() )
+
+## Importing data from dataframe
+
+	import pandas as pd
+	import penmon as pm
+
+	# Assuming 'your_data.csv' contains your data
+	import_data_frame = pd.read_csv('import_test.csv')
+
+	# Create an instance of the Station class
+	station = pm.Station(latitude=41.42, altitude=109)
+
+	# Import data into the Station instance
+	day = station.import_data(import_data_frame)
+	print(station.days[1].eto)
+	for day_number, day_entry in station.days.items():
+		eto_value = day_entry.eto()
+		print(f"Day {day_number}: ETo = {eto_value:.2f} mm")
 
 # DESCRIPTION
 
